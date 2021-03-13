@@ -10,6 +10,7 @@ import android.view.Menu;
 import com.example.cyacle.databinding.ActivityMainBinding;
 import com.example.cyacle.ui.gallery.GalleryFragment;
 import com.example.cyacle.ui.location.MapsFragment;
+import com.example.cyacle.ui.setting.SettingsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
                 break;
             case R.id.nav_setting:
-                fragment = new GalleryFragment();
+                fragment = new SettingsFragment();
 
                 break;
 

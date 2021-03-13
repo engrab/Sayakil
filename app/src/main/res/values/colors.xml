@@ -20,4 +20,7 @@
 <!--    bottom navigation selection and deselection-->
     <color name="colorSelected">#26C6DA</color>
     <color name="colorDeSelected">#3C3B3D</color>
+
+    <color name="divider_secondary_very_light_dark_color">#21000000</color>
+
 </resources>
