@@ -1,18 +1,23 @@
 package com.example.cyacle;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 
 import com.example.cyacle.databinding.ActivityMainBinding;
 import com.example.cyacle.ui.gallery.GalleryFragment;
+import com.example.cyacle.ui.location.MapsFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -22,10 +27,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    private ActionBarDrawerToggle mToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +41,14 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
-        setSupportActionBar(binding.appBar.toolbar);
+        setSupportActionBar(binding.toolbar);
 
-        binding.appBar.bottomNavView.setOnNavigationItemSelectedListener(this);
+
+
+        mToggle = new ActionBarDrawerToggle(this, binding.drawerLayout,
+                binding.toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        binding.drawerLayout.addDrawerListener(mToggle);
+        binding.bottomNavView.setOnNavigationItemSelectedListener(this);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -45,23 +58,16 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 .build();
 
         if (savedInstanceState == null) {
-            Fragment fragment = new GalleryFragment();
+            Fragment fragment = new MapsFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.nav_host_fragment, fragment)
                     .commit();
-            binding.appBar.bottomNavView.setSelectedItemId(R.id.bottom_nav_view);
+            binding.bottomNavView.setSelectedItemId(R.id.bottom_nav_view);
         }
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.bottom_nav_menu, menu);
-        return true;
     }
 
 
@@ -79,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
 
         switch (item.getItemId()) {
             case R.id.nav_my_location:
-                fragment = new GalleryFragment();
+                fragment = new MapsFragment();
 
                 break;
 
@@ -108,5 +114,17 @@ public class MainActivity extends AppCompatActivity implements BottomNavigationV
                 .commit();
 
         return true;
+    }
+
+    @Override
+    public void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mToggle.onConfigurationChanged(newConfig);
     }
 }
