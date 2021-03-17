@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cyacle</string>
+    <string name="app_name">Sayakil</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
@@ -1171,4 +1171,6 @@
     <string name="yes_btn">Yes</string>
     <string name="zip_code_postal_code">ZIP/Postal code</string>
     <string name="zip_code_postal_code_optional">ZIP/Postal code (optional)</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

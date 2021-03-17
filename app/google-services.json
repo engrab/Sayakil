@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "375424189378",
+    "project_id": "sayakil-c7bbf",
+    "storage_bucket": "sayakil-c7bbf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:375424189378:android:3fa5605279d01875fecc5b",
+        "android_client_info": {
+          "package_name": "com.oman.sayakil"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "375424189378-qvlqjcb0a6umquf1b47reh4qre7v5nrs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.oman.sayakil",
+            "certificate_hash": "b1b823a210fecd3e208190b9ce0698f3f7ae67ef"
+          }
+        },
+        {
+          "client_id": "375424189378-gcgcmiat0q03976ld0va13cgabmt5lv7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAocEO-S4tz9VDQ-IxL46inybrU4Aucuw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "375424189378-gcgcmiat0q03976ld0va13cgabmt5lv7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

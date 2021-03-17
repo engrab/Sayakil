@@ -33,4 +33,12 @@
             android:icon="@drawable/ic_logout"
             android:title="@string/menu_logout" />
     </group>
+    <item android:title="General" >
+
+        <menu>
+            <item android:title="Share App"
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_baseline_share_24"/>
+        </menu>
+    </item>
 </menu>

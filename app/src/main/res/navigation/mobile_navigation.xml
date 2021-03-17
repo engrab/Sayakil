@@ -3,23 +3,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_message">
-
+    app:startDestination="@id/settingsFragment">
     <fragment
-        android:id="@+id/nav_message"
-        android:name="com.example.cyacle.ui.home.HomeFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
-
+        android:id="@+id/settingsFragment"
+        android:name="com.oman.sayakil.ui.bottom_fragments.SettingsFragment"
+        android:label="fragment_setting"
+        tools:layout="@layout/fragment_setting" />
     <fragment
-        android:id="@+id/nav_payment"
-        android:name="com.example.cyacle.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
-
+        android:id="@+id/cycleFragment"
+        android:name="com.oman.sayakil.ui.bottom_fragments.CycleFragment"
+        android:label="fragment_cycle"
+        tools:layout="@layout/fragment_cycle" />
     <fragment
-        android:id="@+id/nav_trips"
-        android:name="com.example.cyacle.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/mapsFragment"
+        android:name="com.oman.sayakil.ui.bottom_fragments.MapsFragment"
+        android:label="fragment_maps"
+        tools:layout="@layout/fragment_maps" />
+    <fragment
+        android:id="@+id/refreshFragment"
+        android:name="com.oman.sayakil.ui.bottom_fragments.RefreshFragment"
+        android:label="fragment_refresh"
+        tools:layout="@layout/fragment_refresh" />
 </navigation>
