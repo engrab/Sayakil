@@ -416,7 +416,7 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
             LatLng point = new LatLng(mLatitude, mLongitude);
 
             map.moveCamera(CameraUpdateFactory.newLatLng(point));
-            map.animateCamera(CameraUpdateFactory.zoomTo(14));
+            map.animateCamera(CameraUpdateFactory.zoomTo(18));
 
             drawMarker(point);
         } else if (mMarkerPoints.size() != 2) {
@@ -426,7 +426,7 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
             LatLng point = new LatLng(mLatitude, mLongitude);
 
             map.moveCamera(CameraUpdateFactory.newLatLng(point));
-            map.animateCamera(CameraUpdateFactory.zoomTo(14));
+            map.animateCamera(CameraUpdateFactory.zoomTo(18));
             mMarkerPoints = new ArrayList<>();
             drawMarker(point);
         }
