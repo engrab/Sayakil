@@ -10,7 +10,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_message">Message</string>
+    <string name="menu_email">Email</string>
     <string name="menu_payment">Payment Information</string>
     <string name="menu_trip">Trips</string>
     <string name="menu_billing">Billing Statement</string>
@@ -1173,4 +1173,11 @@
     <string name="zip_code_postal_code_optional">ZIP/Postal code (optional)</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="setting">Setting</string>
+    <string name="timerVal">Timer Value</string>
+    <string name="startButtonLabel">Start</string>
+    <string name="resetButtonLabel">Reset</string>
+    <string name="stopButtonLabel">Stop</string>
+    <string name="credit_card_information">CREDIT CARD INFORMATION</string>
+    <string name="menu_profile">Profile</string>
 </resources>

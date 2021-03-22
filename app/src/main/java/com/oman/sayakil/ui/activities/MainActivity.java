@@ -1,7 +1,6 @@
 package com.oman.sayakil.ui.activities;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,23 +21,17 @@ import com.oman.sayakil.ui.drawer_fragments.BillingStatementsFragment;
 import com.oman.sayakil.ui.drawer_fragments.MessageFragment;
 import com.oman.sayakil.ui.drawer_fragments.PaymentInformationFragment;
 import com.oman.sayakil.ui.drawer_fragments.RentTimerFragment;
+import com.oman.sayakil.ui.drawer_fragments.SettingsFragmentPref;
 import com.oman.sayakil.ui.drawer_fragments.StatisticsFragment;
 import com.oman.sayakil.ui.drawer_fragments.TripsFragment;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
     private ActionBarDrawerToggle mToggle;
 
@@ -56,11 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         binding.drawerLayout.addDrawerListener(mToggle);
         binding.drawerNavView.setNavigationItemSelectedListener(this);
         binding.mainContent.bottomNavView.setOnNavigationItemSelectedListener(this);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-//        mAppBarConfiguration = new AppBarConfiguration.Builder(
-//                R.id.nav_bottom_my_location, R.id.nav_bottom_refresh, R.id.nav_bottom_cycle,
-//                R.id.nav_bottom_setting).build();
+
 
         if (savedInstanceState == null) {
 
@@ -71,37 +60,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
 
-//        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-//        NavigationUI.setupWithNavController(binding.mainContent.bottomNavView, navController);
         mToggle.syncState();
     }
 
 
-//    @Override
-//    public boolean onSupportNavigateUp() {
-//        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-//                || super.onSupportNavigateUp();
-//    }
-//
-//
-//    @Override
-//    public void onPostCreate(@Nullable Bundle savedInstanceState) {
-//        super.onPostCreate(savedInstanceState);
-//        mToggle.syncState();
-//    }
-//
-//    @Override
-//    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        mToggle.onConfigurationChanged(newConfig);
-//    }
-
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (mToggle.onOptionsItemSelected(item)){
+        if (mToggle.onOptionsItemSelected(item)) {
             return true;
         }
         return true;
@@ -111,7 +76,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
 
-            case R.id.nav_message:
+            case R.id.nav_profile:
+
+                startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+
+                break;
+
+            case R.id.nav_email:
 
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new MessageFragment())
@@ -149,6 +120,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new RentTimerFragment())
+                        .commit();
+                break;
+            case R.id.nav_setting:
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.nav_host_fragment, new SettingsFragmentPref())
                         .commit();
 
                 break;
@@ -221,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START);
-        }else {
+        } else {
 
             super.onBackPressed();
         }

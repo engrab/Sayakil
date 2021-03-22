@@ -1,0 +1,42 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Unit of Mearurement">
+
+
+        <DropDownPreference
+            app:defaultValue="reply"
+            app:entries="@array/display_unit"
+            app:entryValues="@array/display_values"
+            app:key="reply"
+            app:summary="Display Unit in metric"
+            app:title="Unit of measurement" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Map">
+
+
+        <DropDownPreference
+            app:defaultValue="reply"
+            app:entries="@array/display_unit"
+            app:entryValues="@array/display_values"
+            app:key="reply"
+            app:title="Refresh data"
+            app:summary="Refresh frequency : 1 mintus" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Application">
+
+
+        <Preference
+            app:defaultValue="reply"
+            app:entries="@array/display_unit"
+            app:entryValues="@array/display_values"
+            app:key="reply"
+            app:title="Version"
+            app:summary="1.0.0" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

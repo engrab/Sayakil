@@ -16,6 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Cyacle">
+        <activity android:name=".ui.activities.ProfileActivity"></activity>
         <activity android:name=".ui.activities.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,8 +40,7 @@
         <activity
             android:name=".ui.activities.SignInActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Cyacle.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.Cyacle.NoActionBar"></activity>
     </application>
 
 </manifest>
