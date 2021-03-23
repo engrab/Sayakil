@@ -43,10 +43,12 @@
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -76,7 +78,6 @@
                 android:inputType="text" />
 
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -98,7 +99,12 @@
                     <EditText
                         android:id="@+id/et_date_birth"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:longClickable="false" />
 
                 </LinearLayout>
 
@@ -118,8 +124,7 @@
                     <Spinner
                         android:id="@+id/sp_gender"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        />
+                        android:layout_height="wrap_content" />
 
                 </LinearLayout>
 
@@ -182,13 +187,13 @@
                 android:inputType="textEmailAddress" />
 
 
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:text="SHIPPING ADDRESS (optional)"
                 android:textSize="16sp" />
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -235,6 +240,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Enter State/Province/Region"
                 android:inputType="text" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -245,7 +251,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="@color/purple_200"/>
+                android:background="@color/purple_200" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -262,9 +268,6 @@
                 android:inputType="number" />
         </LinearLayout>
     </ScrollView>
-
-
-
 
 
 </LinearLayout>
