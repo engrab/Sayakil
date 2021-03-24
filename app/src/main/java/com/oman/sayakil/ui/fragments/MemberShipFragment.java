@@ -1,33 +1,42 @@
 package com.oman.sayakil.ui.fragments;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.oman.sayakil.R;
-import com.oman.sayakil.adapters.MemberShipAdapter;
 import com.oman.sayakil.databinding.FragmentMemberShipBinding;
+import com.oman.sayakil.databinding.ItemMemberShipBinding;
 import com.oman.sayakil.model.MemberModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MemberShipFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import static android.app.Activity.RESULT_OK;
+
+
 public class MemberShipFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public static final String GOOGLE_PAY_PACKAGE_NAME = "com.google.android.apps.nbu.paisa.user";
+    int GOOGLE_PAY_REQUEST_CODE = 123;
+    String amount ="10";
+    String name = "Highbrow Director";
+    String upiId = "hashimads123@oksbi";
+    String transactionNote = "pay test";
+    String status;
+    Uri uri;
 
     private List<MemberModel> mList;
     // TODO: Rename and change types of parameters
@@ -39,31 +48,10 @@ public class MemberShipFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MemberShipFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MemberShipFragment newInstance(String param1, String param2) {
-        MemberShipFragment fragment = new MemberShipFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -94,5 +82,98 @@ public class MemberShipFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+
+    private static boolean isAppInstalled(Context context, String packageName) {
+        try {
+            context.getPackageManager().getApplicationInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private static Uri getUpiPaymentUri(String name, String upiId, String transactionNote, String amount) {
+        return new Uri.Builder()
+                .scheme("upi")
+                .authority("pay")
+                .appendQueryParameter("pa", upiId)
+                .appendQueryParameter("pn", name)
+                .appendQueryParameter("tn", transactionNote)
+                .appendQueryParameter("am", amount)
+                .appendQueryParameter("cu", "INR")
+                .build();
+    }
+    private void payWithGPay() {
+        if (isAppInstalled(getContext(), GOOGLE_PAY_PACKAGE_NAME)) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            intent.setPackage(GOOGLE_PAY_PACKAGE_NAME);
+            startActivityForResult(intent, GOOGLE_PAY_REQUEST_CODE);
+        } else {
+            Toast.makeText(getContext(), "Please Install GPay", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data != null) {
+            status = data.getStringExtra("Status").toLowerCase();
+        }
+
+        if ((RESULT_OK == resultCode) && status.equals("success")) {
+            Toast.makeText(getContext(), "Transaction Successful", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "Transaction Failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    public class MemberShipAdapter extends RecyclerView.Adapter<MemberShipAdapter.ViewHolder> {
+
+        private Context mContext;
+        private List<MemberModel> mList;
+
+        public MemberShipAdapter(Context mContext, List<MemberModel> mList) {
+            this.mContext = mContext;
+            this.mList = mList;
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new ViewHolder(ItemMemberShipBinding.inflate(LayoutInflater.from(mContext),parent,false));
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+
+
+            holder.bindingItem.tvDays.setText(mList.get(position).getDays());
+            holder.bindingItem.tvPrice.setText(mList.get(position).getPrice());
+            holder.bindingItem.tvDesc.setText(mList.get(position).getDesc());
+
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    uri = getUpiPaymentUri(name, upiId, transactionNote, amount);
+                    payWithGPay();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return mList.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+
+            ItemMemberShipBinding bindingItem;
+            public ViewHolder(@NonNull ItemMemberShipBinding binding) {
+                super(binding.getRoot());
+                bindingItem = binding;
+            }
+        }
     }
 }

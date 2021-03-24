@@ -1,37 +1,37 @@
 package com.oman.sayakil.model;
 
 public class MemberModel {
-    private String daysMember;
-    private String memberDesc;
-    private String memberPrice;
+    private String days;
+    private String desc;
+    private String price;
 
-    public MemberModel(String daysMember, String memberDesc, String memberPrice) {
-        this.daysMember = daysMember;
-        this.memberDesc = memberDesc;
-        this.memberPrice = memberPrice;
+    public MemberModel(String days, String price,  String desc) {
+        this.days = days;
+        this.desc = desc;
+        this.price = price;
     }
 
-    public String getDaysMember() {
-        return daysMember;
+    public String getDays() {
+        return days;
     }
 
-    public void setDaysMember(String daysMember) {
-        this.daysMember = daysMember;
+    public void setDays(String days) {
+        this.days = days;
     }
 
-    public String getMemberDesc() {
-        return memberDesc;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setMemberDesc(String memberDesc) {
-        this.memberDesc = memberDesc;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
-    public String getMemberPrice() {
-        return memberPrice;
+    public String getPrice() {
+        return price;
     }
 
-    public void setMemberPrice(String memberPrice) {
-        this.memberPrice = memberPrice;
+    public void setPrice(String price) {
+        this.price = price;
     }
 }
