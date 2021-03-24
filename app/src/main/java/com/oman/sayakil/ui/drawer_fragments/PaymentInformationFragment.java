@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.FragmentPaymentInformationBinding;
+import com.oman.sayakil.pref.SharedPreferencesManager;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,23 +72,40 @@ public class PaymentInformationFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentPaymentInformationBinding.inflate(getLayoutInflater(), container, false);
         View view = binding.getRoot();
+        readInfo();
         return view;
     }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+
         inflater.inflate(R.menu.main_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.menu_save){
             Toast.makeText(getContext(), "Save Information", Toast.LENGTH_SHORT).show();
+            writInfo();
         }
-        return super.onOptionsItemSelected(item);
+        return true;
+    }
+
+    private void writInfo() {
+        SharedPreferencesManager.getInstance(getContext()).setCardHolderName(binding.etCardHolderName.getText().toString());
+        SharedPreferencesManager.getInstance(getContext()).setFirstName(binding.etCardHolderName.getText().toString());
+        SharedPreferencesManager.getInstance(getContext()).setCreditCard(binding.etCardNumber.getText().toString());
+        SharedPreferencesManager.getInstance(getContext()).setSecurityCode(binding.etSecurityCode.getText().toString());
+        SharedPreferencesManager.getInstance(getContext()).setExpiryDate(binding.etExpiryDate.getText().toString());
+    }
+
+    private void readInfo(){
+        binding.etCardHolderName.setText(SharedPreferencesManager.getInstance(getContext()).getCardHolderName());
+        binding.etCardNumber.setText(SharedPreferencesManager.getInstance(getContext()).getCreditCard());
+        binding.etExpiryDate.setText(SharedPreferencesManager.getInstance(getContext()).getExpiryDate());
+        binding.etSecurityCode.setText(SharedPreferencesManager.getInstance(getContext()).getSecurityCode());
+
     }
 
     @Override

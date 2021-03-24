@@ -17,6 +17,11 @@
             android:id="@+id/nav_payment"
             android:icon="@drawable/ic_baseline_payment_24"
             android:title="@string/menu_payment" />
+
+        <item
+            android:id="@+id/nav_member_ship"
+            android:icon="@drawable/ic_membership"
+            android:title="@string/menu_member" />
         <item
             android:id="@+id/nav_trips"
             android:icon="@drawable/ic_trip"

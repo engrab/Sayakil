@@ -16,7 +16,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray"/>
+        android:background="@android:color/darker_gray" />
 
     <TextView
         android:layout_width="match_parent"
@@ -26,10 +26,10 @@
         android:textSize="16sp" />
 
     <EditText
+        android:id="@+id/et_card_holder_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter the Name"
-        android:id="@+id/et_card_holder_name"/>
+        android:hint="Enter the Name" />
 
     <TextView
         android:layout_width="match_parent"
@@ -39,11 +39,11 @@
         android:textSize="16sp" />
 
     <EditText
+        android:id="@+id/et_card_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter card number"
-        android:inputType="number"
-        android:id="@+id/et_card_number"/>
+        android:inputType="number" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -51,42 +51,44 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3">
+            android:layout_weight="3"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
                 android:layout_margin="10dp"
-                android:text="Expiration date"/>
+                android:text="Expiration date"
+                android:textSize="16sp" />
+
             <EditText
+                android:id="@+id/et_expiry_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="date"
-                android:id="@+id/et_expiry_date"/>
+                android:inputType="date" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2">
+            android:layout_weight="2"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
                 android:layout_margin="10dp"
-                android:text="Security code"/>
+                android:text="Security code"
+                android:textSize="16sp" />
+
             <EditText
+                android:id="@+id/et_security_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="date"
-                android:id="@+id/et_security_code"/>
+                android:inputType="date" />
 
         </LinearLayout>
 

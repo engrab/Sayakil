@@ -2,6 +2,7 @@ package com.oman.sayakil.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.oman.sayakil.ui.drawer_fragments.RentTimerFragment;
 import com.oman.sayakil.ui.drawer_fragments.SettingsFragmentPref;
 import com.oman.sayakil.ui.drawer_fragments.StatisticsFragment;
 import com.oman.sayakil.ui.drawer_fragments.TripsFragment;
+import com.oman.sayakil.ui.fragments.MemberShipFragment;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -64,11 +66,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
+
+
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (mToggle.onOptionsItemSelected(item)) {
             return true;
         }
+
         return true;
     }
 
@@ -94,6 +99,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new PaymentInformationFragment())
+                        .commit();
+                break;
+
+            case R.id.nav_member_ship:
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.nav_host_fragment, new MemberShipFragment())
                         .commit();
                 break;
 

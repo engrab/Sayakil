@@ -86,6 +86,7 @@ public class ProfileActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId()==R.id.menu_save){
             setPref();
+            getPref();
             Toast.makeText(this, "Save Information Successfully", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
@@ -119,6 +120,6 @@ public class ProfileActivity extends AppCompatActivity {
         binding.etLine2.setText(SharedPreferencesManager.getInstance(this).getL2());
         binding.etZip.setText(SharedPreferencesManager.getInstance(this).getZipcode());
         binding.etProvince.setText(SharedPreferencesManager.getInstance(this).getProvince());
-        binding.spGender.setSelection(SharedPreferencesManager.getInstance(this).getGender());
+//        binding.spGender.setSelection(SharedPreferencesManager.getInstance(this).getGender());
         }
 }

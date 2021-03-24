@@ -20,6 +20,10 @@ public class SharedPreferencesManager {
     private static final String ZIPCODE_KEY = "zipcode";
     private static final String PROVINCCE_KEY = "province";
     private static final String GENDER_KEY = "gender";
+    private static final String CREDIT_CARD_KEY = "card";
+    private static final String EXPIRY_DATE_KEY = "expiry";
+    private static final String SECURITY_CODE_KEY = "scode";
+    private static final String CARD_HOLDER_NAME_KEY = "cardHolder";
 
 
     private SharedPreferences sharedPrefs;
@@ -157,5 +161,46 @@ public class SharedPreferencesManager {
 
     public int getGender() {
         return sharedPrefs.getInt(GENDER_KEY, 1);
+    }
+
+
+    public void setCreditCard(String number) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(CREDIT_CARD_KEY, number);
+        editor.apply();
+    }
+
+    public String getCreditCard() {
+        return sharedPrefs.getString(CREDIT_CARD_KEY, "1234");
+    }
+
+    public void setExpiryDate(String expiryDate) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(EXPIRY_DATE_KEY, expiryDate);
+        editor.apply();
+    }
+
+    public String getExpiryDate() {
+        return sharedPrefs.getString(PROVINCCE_KEY, "11/20");
+    }
+
+    public void setSecurityCode(String securityCode) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(SECURITY_CODE_KEY, securityCode);
+        editor.apply();
+    }
+
+    public String getSecurityCode() {
+        return sharedPrefs.getString(SECURITY_CODE_KEY, "123");
+    }
+
+    public void setCardHolderName(String cardHolderName) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putString(CARD_HOLDER_NAME_KEY, cardHolderName);
+        editor.apply();
+    }
+
+    public String getCardHolderName() {
+        return sharedPrefs.getString(CARD_HOLDER_NAME_KEY, "ABC");
     }
 }

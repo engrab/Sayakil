@@ -1180,4 +1180,9 @@
     <string name="stopButtonLabel">Stop</string>
     <string name="credit_card_information">CREDIT CARD INFORMATION</string>
     <string name="menu_profile">Profile</string>
+    <string name="one_day_memeber_ship">This is a One Day Membership for users of Oman Bikeshare network that allows unlimited number of 1 hour rides for a period of 24 hours. Please note rides above 1 hour will incur additional usage charges.</string>
+    <string name="three_day_memeber_ship">This is a Three Day Membership for users of Oman Bikeshare network that allows unlimited number of 1 hour rides for a period of 3 days. Please note rides above 1 hour will incur additional usage charges.</string>
+    <string name="monthly_memeber_ship">Unlimited number of trips , first 60 mintes of each trips are included in monthly membership , after which additional usaage fees apply.</string>
+    <string name="yearly_memeber_ship">Unlimited number of trips , first 60 mintes of each trips are included in yearly membership , after which additional usaage fees apply.</string>
+    <string name="menu_member">Member ship</string>
 </resources>
