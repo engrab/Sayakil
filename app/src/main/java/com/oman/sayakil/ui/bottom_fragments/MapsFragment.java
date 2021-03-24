@@ -6,10 +6,19 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.IntentSender;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
@@ -20,15 +29,27 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.speech.RecognizerIntent;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.oman.sayakil.AppController;
 import com.oman.sayakil.DirectionsJSONParser;
+import com.oman.sayakil.LocationServiceRoute;
 import com.oman.sayakil.R;
 import com.oman.sayakil.Utils;
 import com.oman.sayakil.databinding.FragmentMapsBinding;
@@ -52,7 +73,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.oman.sayakil.ui.activities.MainActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -60,7 +84,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,47 +95,44 @@ import java.util.Locale;
 
 import static android.content.Context.LOCATION_SERVICE;
 
-public class MapsFragment extends Fragment implements LocationListener,OnMapReadyCallback, View.OnClickListener, GoogleMap.OnMyLocationButtonClickListener{
+public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
-
+    public static TextView speedometerText;
     private FragmentMapsBinding binding;
-    boolean refresh = false;
-    Handler handler = new Handler();
-    int repeatTime = 3000;
+    static boolean status;
+    public static float maxSpeed;
     Geocoder geocoder;
     List<Address> addresses;
     GoogleMap map;
     ArrayList<LatLng> mMarkerPoints;
-    double mLatitude = 0;
-    double mLongitude = 0;
-    Runnable r = new Runnable() {
+    String TAG = "mapactivity";
+    boolean mapBusy = false;
+    Dialog mDialog;
+    int VOICE_REQUEST = 12;
+    SharedPreferences sharedpreferences;
+    Activity context;
+    int mapType = 1;
+    LocationServiceRoute myService;
+    LocationManager locationManager;
+    boolean isFromStart = true;
+    boolean isTrafficEnable = false;
+    boolean isNightModEnable = false;
+    private MapStyleOptions nightMapStyleOptions;
+    private MapStyleOptions standradMapStyleOptions;
+    private AutoCompleteTextView completeTextView;
+    private ServiceConnection sc = new ServiceConnection() {
         @Override
-        public void run() {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationServiceRoute.LocalBinder binder = (LocationServiceRoute.LocalBinder) service;
+            myService = binder.getService();
+            status = true;
+        }
 
-            if (Utils.isNetworkAvailable(getActivity())) {
-                repeatTime = 1000;
-                binding.latlong.setVisibility(View.VISIBLE);
-
-                binding.topline.setVisibility(View.GONE);
-                if (refresh) {
-                    refresh = false;
-                    Toast.makeText(getActivity(), "Internet Access!", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                refresh = true;
-                binding.topline.setVisibility(View.VISIBLE);
-                binding.latlong.setVisibility(View.GONE);
-                repeatTime = 3000;
-            }
-            handler.postDelayed(r, repeatTime);
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            status = false;
         }
     };
-    String TAG = "mapactivity";
-    boolean showDialog = false;
-    String addressFrom, addressTo, distanceInfo;
-    boolean mapBusy = false;
-    UiSettings mUiSettings;
-    private String style = "";
 
     @Nullable
     @Override
@@ -117,28 +140,121 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentMapsBinding.inflate(inflater, container, false);
-       View view = binding.getRoot();
+        View view = binding.getRoot();
 
+        speedometerText = binding.ivSpeedometr;
 
+        context = getActivity();
+        sharedpreferences = context.getSharedPreferences("AddressPref", Context.MODE_PRIVATE);
+        nightMapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.nightmode_map);
+        standradMapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.standard_map);
+        showSpeedDialog();
+        binding.nightMode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (isNightModEnable) {
+                    isNightModEnable = false;
+                    binding.nightMode.setImageResource(R.drawable.ic_sun);
+                    if (map != null) {
+                        map.setMapStyle(standradMapStyleOptions);
+                    }
+                } else {
+                    isNightModEnable = true;
+                    binding.nightMode.setImageResource(R.drawable.ic_baseline_nights_stay_24);
+                    if (map != null) {
+                        map.setMapStyle(nightMapStyleOptions);
+                    }
+                }
+            }
+        });
+        binding.ivTraffic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isTrafficEnable) {
+                    isTrafficEnable = false;
+                    binding.ivTraffic.setImageResource(R.drawable.ic_baseline_map_24);
+                    if (map != null) {
+                        map.setTrafficEnabled(false);
+                    }
+                } else {
+                    isTrafficEnable = true;
+                    binding.ivTraffic.setImageResource(R.drawable.ic_traffic);
+                    if (map != null) {
+                        map.setTrafficEnabled(true);
+                    }
+                }
+            }
+        });
+        binding.ivPause.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDestinationDialog();
+            }
+        });
+        binding.ivLimit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isFromStart = false;
+                showSpeedDialog();
+            }
+        });
+        binding.imgZoomIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                map.animateCamera(CameraUpdateFactory.zoomIn());
+            }
+        });
+        binding.imgZoomOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                map.animateCamera(CameraUpdateFactory.zoomOut());
+            }
+        });
+        binding.ivMap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (map != null) {
+                    if (mapType == 0) {
+                        mapType = 1;
+                        binding.ivMap.setImageResource(R.drawable.ic_baseline_map_24);
+                        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    } else if (mapType == 1) {
+                        mapType = 2;
+                        binding.ivMap.setImageResource(R.drawable.ic_satellite);
+                        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    } else if (mapType == 2) {
+                        mapType = 3;
+                        binding.ivMap.setImageResource(R.drawable.ic_hybrid);
+                        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+                    } else if (mapType == 3) {
+                        mapType = 0;
+                        binding.ivMap.setImageResource(R.drawable.ic_terrain);
+                        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                    }
+
+                }
+            }
+        });
         geocoder = new Geocoder(getContext(), Locale.getDefault());
-        binding.latlong.setVisibility(View.GONE);
 
-        binding.latlong.setText("Tap on the map to calculate the distance!");
+        int mapStatus = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
 
-        int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
-
-        if (status != ConnectionResult.SUCCESS) {
+        if (mapStatus != ConnectionResult.SUCCESS) {
             int requestCode = 10;
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, status, requestCode);
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, mapStatus, requestCode);
             dialog.show();
+        }
 
-        } else {
-            SupportMapFragment fm = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-            fm.getMapAsync(this);
-            displayLocationSettingsRequest(getContext());
-            binding.latlong.setOnClickListener(this);
-            handler.postDelayed(r, repeatTime);
-            binding.topline.setOnClickListener(this);
+        maxSpeed = sharedpreferences.getFloat("maxSpeed", 80);
+
+        checkGps();
+        locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        if (locationManager != null && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+
+        }
+        if (!status) {
+            bindService();
         }
         return view;
     }
@@ -154,6 +270,278 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
     }
 
 
+    void bindService() {
+
+        getContext().startService(new Intent(context, LocationServiceRoute.class));
+    }
+
+    void checkGps() {
+        locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        if (locationManager != null && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+
+            showGPSDisabledAlertToUser();
+        }
+    }
+
+    private void showGPSDisabledAlertToUser() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+        alertDialogBuilder.setMessage("Enable GPS to use application")
+                .setCancelable(false)
+                .setPositiveButton("Enable GPS",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Intent callGPSSettingIntent = new Intent(
+                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(callGPSSettingIntent);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert = alertDialogBuilder.create();
+        alert.show();
+    }
+
+    void unbindService() {
+//        if (!status)
+//        {
+//            return;
+//        }
+        try {
+
+//            if (sc != null)
+//            {
+//                unbindService(sc);
+//                status = false;
+//            }
+            getContext().stopService(new Intent(context, LocationServiceRoute.class));
+
+//            Intent intent = new Intent(context, LocationServiceRoute.class);
+//            intent.setAction(LocationServiceRoute.STOP_SERVICE);
+//            startService(intent);
+        } catch (Exception ignored) {
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == VOICE_REQUEST && data != null) {
+                String address = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
+                try {
+                    if (address == null || address.equals("")) {
+                        Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    completeTextView.setText(address);
+                    completeTextView.setSelection(completeTextView.length());
+
+                } catch (Exception ignored) {
+
+                }
+            }
+        }
+
+    }
+
+    private void showSpeedDialog() {
+        try {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.speedlimit_dialog, null, false);
+            final EditText speedLimit = view.findViewById(R.id.speed_limit);
+            speedLimit.setText(maxSpeed + "");
+            speedLimit.setSelection(speedLimit.length());
+//            speedLimit.setSelected(true);
+//            speedLimit.setSelectAllOnFocus(true);
+            view.findViewById(R.id.go).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (speedLimit.getText().toString().equals("")) {
+                        Toast.makeText(getContext(), "Please enter speed limit", Toast.LENGTH_SHORT).show();
+                    } else {
+                        maxSpeed = Float.parseFloat(speedLimit.getText().toString());
+                        SharedPreferences.Editor editor = sharedpreferences.edit();
+                        editor.putFloat("maxSpeed", maxSpeed);
+                        editor.apply();
+                        mDialog.dismiss();
+                        if (isFromStart && !sharedpreferences.getString("address", "").equals("")) {
+                            showLoadPreviousDialog(sharedpreferences.getString("address", ""));
+                        }
+                    }
+                }
+            });
+
+            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
+            mDialog.setContentView(view);
+            mDialog.setCancelable(true);
+            mDialog.setCanceledOnTouchOutside(false);
+            if (mDialog.getWindow() != null) {
+                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                mDialog.getWindow().setGravity(Gravity.CENTER);
+            }
+            mDialog.show();
+        } catch (Exception ignored) {
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void showLoadPreviousDialog(final String destination) {
+        try {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.showloadprevous_dialog, null, false);
+            final TextView tvDestination = view.findViewById(R.id.tvMessage);
+            tvDestination.setText("Destination: " + destination);
+            view.findViewById(R.id.btnload).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mDialog.dismiss();
+                    setLatLng(destination);
+                }
+            });
+            view.findViewById(R.id.btncancel).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDialog.dismiss();
+
+                }
+            });
+
+            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
+            mDialog.setContentView(view);
+            mDialog.setCancelable(true);
+            mDialog.setCanceledOnTouchOutside(false);
+            if (mDialog.getWindow() != null) {
+                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                mDialog.getWindow().setGravity(Gravity.CENTER);
+            }
+            mDialog.show();
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void showDestinationDialog() {
+        try {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.destination_dialog, null, false);
+            view.findViewById(R.id.go).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (completeTextView.getText().toString().equals("")) {
+                        Toast.makeText(getContext(), "Please enter destination first", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    setLatLng(completeTextView.getText().toString());
+                    mDialog.dismiss();
+                }
+            });
+            view.findViewById(R.id.voice).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        if (getContext().getPackageManager().queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0)
+                                .size() != 0) {
+                            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Where you want to go! Speak Now!");
+                            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+                            startActivityForResult(intent, VOICE_REQUEST);
+                        } else {
+                            AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                            alertDialog.setTitle("Warning!");
+                            alertDialog.setMessage("Voice Recognition Engine on Your Device is Not Active");
+                            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                            alertDialog.show();
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            });
+            completeTextView = view.findViewById(R.id.Destination);
+            completeTextView.setAdapter(new Filter(MapsFragment.this, getContext(), R.layout.adp_auto_complete));
+            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
+            mDialog.setContentView(view);
+            mDialog.setCancelable(true);
+            mDialog.setCanceledOnTouchOutside(false);
+            if (mDialog.getWindow() != null) {
+                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                mDialog.getWindow().setGravity(Gravity.CENTER);
+            }
+            mDialog.show();
+        } catch (Exception ignored) {
+        }
+    }
+
+    public ArrayList getOptions(String str) {
+        HttpURLConnection httpURLConnection;
+        Throwable th;
+        HttpURLConnection httpURLConnection2 = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            String stringBuilder2 = "https://maps.googleapis.com/maps/api/place/autocomplete/json" +
+                    "?key=AIzaSyAg2ClfHcXyv-Yp2RUrERF6Hfn53G0ntHw" +
+                    "&input=" + URLEncoder.encode(str, "utf8");
+            httpURLConnection = (HttpURLConnection) new URL(stringBuilder2).openConnection();
+            try {
+                InputStreamReader inputStreamReader = new InputStreamReader(httpURLConnection.getInputStream());
+                char[] cArr = new char[1024];
+                while (true) {
+                    int read = inputStreamReader.read(cArr);
+                    if (read == -1) {
+                        break;
+                    }
+                    stringBuilder.append(cArr, 0, read);
+                }
+                httpURLConnection.disconnect();
+                try {
+                    JSONArray jSONArray = new JSONObject(stringBuilder.toString()).getJSONArray("predictions");
+                    ArrayList arrayList = new ArrayList(jSONArray.length());
+                    int i = 0;
+                    while (i < jSONArray.length()) {
+                        try {
+                            System.out.println(jSONArray.getJSONObject(i).getString("description"));
+                            System.out.println("============================================================");
+                            arrayList.add(jSONArray.getJSONObject(i).getString("description"));
+                            i++;
+                        } catch (JSONException e) {
+                            return arrayList;
+                        }
+                    }
+                    return arrayList;
+                } catch (JSONException e2) {
+                    return null;
+                }
+            } catch (MalformedURLException e3) {
+                httpURLConnection.disconnect();
+                return null;
+            } catch (IOException e4) {
+                httpURLConnection.disconnect();
+                return null;
+            } catch (Throwable th2) {
+                httpURLConnection2 = httpURLConnection;
+                th = th2;
+                if (httpURLConnection2 != null) {
+                    httpURLConnection2.disconnect();
+                }
+                throw th;
+            }
+        } catch (MalformedURLException e5) {
+            return null;
+        } catch (IOException e6) {
+            return null;
+        } catch (Throwable th4) {
+            if (httpURLConnection2 != null) {
+                httpURLConnection2.disconnect();
+            }
+
+        }
+
+        return null;
+    }
 
     private String getDirectionsUrl(LatLng origin, LatLng dest) {
 
@@ -213,15 +601,8 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
     @Override
     public void onMapReady(GoogleMap googleMap) {
         // Initializing
-        mMarkerPoints = new ArrayList<>();
-        if (style.equals("3d")) {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        } else if (style.equals("satellite")) {
-            googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-        }
         map = googleMap;
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -229,161 +610,19 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-
             return;
         }
-
         map.setMyLocationEnabled(true);
-        map.setOnMyLocationButtonClickListener(this);
+        mMarkerPoints = new ArrayList<>();
+        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
-        mUiSettings = map.getUiSettings();
-
-        // Keep the UI Settings state in sync with the checkboxes.
-        mUiSettings.setZoomControlsEnabled(true);
-        mUiSettings.setCompassEnabled(true);
-        mUiSettings.setMyLocationButtonEnabled(true);
-        mUiSettings.setScrollGesturesEnabled(true);
-        mUiSettings.setZoomGesturesEnabled(true);
-        mUiSettings.setTiltGesturesEnabled(true);
-        mUiSettings.setRotateGesturesEnabled(true);
-        mUiSettings.setMapToolbarEnabled(true);
-        LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-        if (locationManager != null) {
-            String provider = locationManager.getBestProvider(new Criteria(), true);
-            Location location = locationManager.getLastKnownLocation(provider);
-            if (location != null) {
-                onLocationChanged(location);
-            }
-            locationManager.requestLocationUpdates(provider, 20000, 1, this);
+        if (map != null && AppController.getAppInstance().getGlobalLocation() != null) {
+            Location location = AppController.getAppInstance().getGlobalLocation();
+            LatLng point = new LatLng(location.getLatitude(), location.getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLng(point));
+            map.animateCamera(CameraUpdateFactory.zoomTo(18));
         }
 
-
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-
-            @Override
-            public void onMapClick(LatLng point) {
-
-                try {
-                    if (map == null) {
-                        return;
-                    }
-
-                    if (map == null) {
-                        return;
-                    }
-                    if (mapBusy) {
-                        Utils.mapeBusy(getContext());
-                        return;
-                    }
-                    if (!Utils.isNetworkAvailable(getContext())) {
-                        Utils.wifiNotFound(getContext());
-                        return;
-                    }
-                    if (!Utils.isLocationEnabled(getContext())) {
-                        Utils.locationNotFound(getContext());
-                        return;
-                    }
-                    // Already map contain destination location
-                    if (mMarkerPoints.size() > 1) {
-                        mMarkerPoints.clear();
-                        map.clear();
-                        LatLng startPoint = new LatLng(mLatitude, mLongitude);
-                        drawMarker(startPoint);
-                    }
-
-                    drawMarker(point);
-
-                    // Checks, whether start and end locations are captured
-                    if (mMarkerPoints.size() >= 2) {
-                        mapBusy = true;
-                        LatLng origin = mMarkerPoints.get(0);
-                        LatLng dest = mMarkerPoints.get(1);
-
-                        // Getting URL to the Google Directions API
-                        String url = getDirectionsUrl(origin, dest);
-                        CalculationByDistance(origin, dest);
-
-                        // Start downloading json data from Google Directions API
-                        new DownloadTask().execute(url);
-                    }
-
-                } catch (Exception ignored) {
-                }
-            }
-        });
-    }
-
-    public void CalculationByDistance(LatLng StartP, LatLng EndP) {
-        int Radius = 6371;
-        double lat1 = StartP.latitude;
-        double lat2 = EndP.latitude;
-        double lon1 = StartP.longitude;
-        double lon2 = EndP.longitude;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.asin(Math.sqrt(a));
-        double valueResult = Radius * c;
-        double km = valueResult / 1;
-        DecimalFormat newFormat = new DecimalFormat("####");
-        int kmInDec = Integer.valueOf(newFormat.format(km));
-        double meter = valueResult % 1000;
-        int meterInDec = Integer.valueOf(newFormat.format(meter));
-        Log.i(TAG, "" + valueResult + "   KM  " + kmInDec + " Meter   " + meterInDec);
-
-        if (valueResult > 1) {
-            distanceInfo = "You are " + kmInDec + " KM " + meterInDec + " M away from destination";
-            binding.latlong.setText(String.valueOf("Distance\n" + distanceInfo));
-        } else {
-            distanceInfo = "You are " + valueResult + " KM away from destination";
-            binding.latlong.setText(String.valueOf("Distance\n" + distanceInfo));
-        }
-
-        addressFrom = Utils.getCompleteAddressString(getContext(), StartP.latitude, StartP.longitude);
-        addressTo = Utils.getCompleteAddressString(getContext(), EndP.latitude, EndP.longitude);
-
-        showDialog = true;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.latlong:
-                openDialog();
-                break;
-            case R.id.topline:
-                Utils.openWifi(getContext());
-                break;
-        }
-    }
-
-    private void openDialog() {
-        if (!showDialog) {
-            Toast.makeText(getContext(), "Select the destination first.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        final Dialog dialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
-        dialog.setContentView(R.layout.rout_info_dialog);
-        dialog.setTitle("Route Information!");
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        TextView from = dialog.findViewById(R.id.from);
-        TextView to = dialog.findViewById(R.id.to);
-        TextView innfoDistance = dialog.findViewById(R.id.distanceInfo);
-        Button ok = dialog.findViewById(R.id.ok);
-        from.setText(addressFrom);
-        to.setText(addressTo);
-        innfoDistance.setText(distanceInfo);
-
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
 
     }
 
@@ -397,123 +636,35 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
         options.position(point);
         options.title(getAddress(point));
         if (mMarkerPoints.size() == 1) {
-            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_baseline_location_on_24));
+            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation));
         } else if (mMarkerPoints.size() == 2) {
-            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_baseline_location_destination_on_24));
+            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_location_pin));
         }
         map.addMarker(options);
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        if (map == null) {
-            return;
-        }
-
-        if (mMarkerPoints.size() < 1) {
-            mLatitude = location.getLatitude();
-            mLongitude = location.getLongitude();
-            LatLng point = new LatLng(mLatitude, mLongitude);
-
-            map.moveCamera(CameraUpdateFactory.newLatLng(point));
-            map.animateCamera(CameraUpdateFactory.zoomTo(18));
-
-            drawMarker(point);
-        } else if (mMarkerPoints.size() != 2) {
-            map.clear();
-            mLatitude = location.getLatitude();
-            mLongitude = location.getLongitude();
-            LatLng point = new LatLng(mLatitude, mLongitude);
-
-            map.moveCamera(CameraUpdateFactory.newLatLng(point));
-            map.animateCamera(CameraUpdateFactory.zoomTo(18));
-            mMarkerPoints = new ArrayList<>();
-            drawMarker(point);
-        }
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        //
-        // TODO Auto-generated method stub
-    }
-
-    @Override
     public void onPause() {
 
-        handler.removeCallbacks(r);
         super.onPause();
     }
 
     @Override
     public void onResume() {
 
-        handler.postDelayed(r, 3000);
         super.onResume();
     }
 
     @Override
     public void onStop() {
-
         super.onStop();
-        handler.removeCallbacks(r);
+
     }
 
     @Override
-    public boolean onMyLocationButtonClick() {
-        displayLocationSettingsRequest(getContext());
-        return false;
-    }
+    public void onDestroy() {
+        super.onDestroy();
 
-    private void displayLocationSettingsRequest(Context context) {
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API).build();
-        googleApiClient.connect();
-
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(10000 / 2);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
-        builder.setAlwaysShow(true);
-
-        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        Log.i(TAG, "All location settings are satisfied.");
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
-
-                        try {
-                            // Show the dialog by calling startResolutionForResult(), and check the result
-                            // in onActivityResult().
-                            status.startResolutionForResult(getActivity(), 12);
-                        } catch (IntentSender.SendIntentException e) {
-                            Log.i(TAG, "PendingIntent unable to execute request.");
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
-                        break;
-                }
-            }
-        });
     }
 
     private String getAddress(LatLng location) {
@@ -540,9 +691,152 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
         return "";
     }
 
+    private void setLatLng(String address) {
+        try {
+            if (address == null || address.equals("")) {
+                Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                List<Address> addresses = geocoder.getFromLocationName(address, 1);
+                if (addresses != null) {
+
+                    Address locationAddress = addresses.get(0);
+                    if (AppController.getAppInstance().getGlobalLocation() == null) {
+                        Toast.makeText(getContext(), "Starting point not found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (map == null) {
+                        return;
+                    }
+                    if (locationAddress == null) {
+                        Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                    editor.putString("address", address);
+                    editor.apply();
+                    Location location = AppController.getAppInstance().getGlobalLocation();
+                    LatLng orign = new LatLng(location.getLatitude(), location.getLongitude());
+                    drawMarker(orign);
+                    LatLng dest = new LatLng(locationAddress.getLatitude(), locationAddress.getLongitude());
+                    drawMarker(dest);
+                    String url = getDirectionsUrl(orign, dest);
+                    new DownloadTask().execute(url);
+                } else {
+                    Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
+                    Log.w("", "My Current loction address,No Address returned!");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.w("", "My Current loction address,Canont get Address!");
+            }
+
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    private void ExitDialog() {
+
+        try {
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.notification_dialog, null, false);
+            view.findViewById(R.id.btnAccept).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+
+                        mDialog.dismiss();
+
+                    } catch (Exception ignored) {
+                    }
+
+                }
+            });
+            view.findViewById(R.id.btnstop).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+//                    if (status)
+//                    {
+                    unbindService();
+//                    }
+                    mDialog.dismiss();
+
+                }
+            });
+
+
+            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
+            mDialog.setContentView(view);
+            mDialog.setCancelable(true);
+            mDialog.setCanceledOnTouchOutside(false);
+            if (mDialog.getWindow() != null) {
+                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                mDialog.getWindow().setGravity(Gravity.BOTTOM);
+            }
+            mDialog.show();
+        } catch (Exception ignored) {
+        }
+    }
+
+    class Filter extends ArrayAdapter implements Filterable {
+        MapsFragment drawPath;
+        private ArrayList arrayList;
+
+        Filter(MapsFragment routeHome, Context context, int i) {
+            super(context, i);
+            this.drawPath = routeHome;
+
+        }
+
+        String m13046a(int i) {
+            return this.arrayList.get(i).toString();
+        }
+
+        public int getCount() {
+            return this.arrayList.size();
+        }
+
+        @NonNull
+        public android.widget.Filter getFilter() {
+            return new filterClass(this);
+        }
+
+        public /* synthetic */ Object getItem(int i) {
+            return m13046a(i);
+        }
+
+        class filterClass extends android.widget.Filter {
+            Filter filter;
+
+            filterClass(Filter filter) {
+                this.filter = filter;
+            }
+
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                FilterResults filterResults = new FilterResults();
+                if (charSequence != null) {
+                    this.filter.arrayList = this.filter.drawPath.getOptions(charSequence.toString());
+                    filterResults.values = this.filter.arrayList;
+                    filterResults.count = this.filter.arrayList.size();
+                }
+                return filterResults;
+            }
+
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                if (filterResults == null || filterResults.count <= 0) {
+                    this.filter.notifyDataSetInvalidated();
+                } else {
+                    this.filter.notifyDataSetChanged();
+                }
+            }
+        }
+    }
+
     /**
      * A class to download data from Google Directions URL
      */
+    @SuppressLint("StaticFieldLeak")
     private class DownloadTask extends AsyncTask<String, Void, String> {
 
         @Override
@@ -570,6 +864,7 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
     /**
      * A class to parse the Google Directions in JSON format
      */
+    @SuppressLint("StaticFieldLeak")
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
 
         @Override
@@ -624,7 +919,7 @@ public class MapsFragment extends Fragment implements LocationListener,OnMapRead
                             // Adding all the points in the route to LineOptions
                             lineOptions.addAll(points);
                             lineOptions.width(5);
-                            lineOptions.color(Color.RED);
+                            lineOptions.color(Color.GREEN);
                         }
 
                     }
