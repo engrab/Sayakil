@@ -10,7 +10,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_email">Email</string>
+    <string name="menu_email">Notification</string>
     <string name="menu_payment">Payment Information</string>
     <string name="menu_trip">Trips</string>
     <string name="menu_billing">Billing Statement</string>
