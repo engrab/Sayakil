@@ -2,138 +2,82 @@ package com.oman.sayakil.ui.bottom_fragments;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
-import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Address;
-import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
-import android.speech.RecognizerIntent;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Filterable;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.MapStyleOptions;
-import com.oman.sayakil.AppController;
-import com.oman.sayakil.DirectionsJSONParser;
-import com.oman.sayakil.LocationServiceRoute;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.oman.sayakil.R;
-import com.oman.sayakil.Utils;
 import com.oman.sayakil.databinding.FragmentMapsBinding;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.oman.sayakil.ui.activities.MainActivity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback {
+public class MapsFragment extends Fragment implements OnMapReadyCallback,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
-    public static TextView speedometerText;
     private FragmentMapsBinding binding;
-    static boolean status;
-    public static float maxSpeed;
-    Geocoder geocoder;
-    List<Address> addresses;
-    GoogleMap map;
-    ArrayList<LatLng> mMarkerPoints;
-    String TAG = "mapactivity";
-    boolean mapBusy = false;
-    Dialog mDialog;
-    int VOICE_REQUEST = 12;
-    SharedPreferences sharedpreferences;
-    Activity context;
-    int mapType = 1;
-    LocationServiceRoute myService;
-    LocationManager locationManager;
-    boolean isFromStart = true;
-    boolean isTrafficEnable = false;
-    boolean isNightModEnable = false;
-    private MapStyleOptions nightMapStyleOptions;
-    private MapStyleOptions standradMapStyleOptions;
-    private AutoCompleteTextView completeTextView;
-    private ServiceConnection sc = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            LocationServiceRoute.LocalBinder binder = (LocationServiceRoute.LocalBinder) service;
-            myService = binder.getService();
-            status = true;
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            status = false;
-        }
-    };
+    public static final int DEFAULT_ZOOM = 15;
+    private final double ISLAMABAD_LAT = 33.690904;
+    private final double ISLAMABAD_LNG = 73.051865;
 
+    public static final int PERMISSION_REQUEST_CODE = 9001;
+    private static final int PLAY_SERVICES_ERROR_CODE = 9002;
+    public static final int GPS_REQUEST_CODE = 9003;
+    public static final String TAG = "MapDebug";
+    private boolean mLocationPermissionGranted;
+
+
+    private GoogleMap mGoogleMap;
+    private FusedLocationProviderClient mLocationClient;
+    private LocationCallback mLocationCallback;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -142,120 +86,78 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         binding = FragmentMapsBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
 
-        speedometerText = binding.ivSpeedometr;
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("messages").child("location").child("latlng");
+        // Read from the database
 
-        context = getActivity();
-        sharedpreferences = context.getSharedPreferences("AddressPref", Context.MODE_PRIVATE);
-        nightMapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.nightmode_map);
-        standradMapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.standard_map);
-        showSpeedDialog();
-        binding.nightMode.setOnClickListener(new View.OnClickListener() {
+
+        binding.btnLocate.setOnClickListener(this::geoLocate);
+        initGoogleMap();
+//        getCurrentLocation();
+        mLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
+        mLocationCallback = new LocationCallback() {
             @Override
-            public void onClick(View view) {
+            public void onLocationResult(LocationResult locationResult) {
 
-                if (isNightModEnable) {
-                    isNightModEnable = false;
-                    binding.nightMode.setImageResource(R.drawable.ic_sun);
-                    if (map != null) {
-                        map.setMapStyle(standradMapStyleOptions);
-                    }
-                } else {
-                    isNightModEnable = true;
-                    binding.nightMode.setImageResource(R.drawable.ic_baseline_nights_stay_24);
-                    if (map != null) {
-                        map.setMapStyle(nightMapStyleOptions);
-                    }
+                if (locationResult == null) {
+                    return;
                 }
+
+                Location location = locationResult.getLastLocation();
+
+                myRef.push().setValue(location.getLatitude() + " : " + location.getLongitude());
+                Toast.makeText(getContext(), location.getLatitude() + " \n" +
+                        location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                binding.tvLocation.setText(location.getLatitude() + " : " + location.getLongitude());
+
+                gotoLocation(location.getLatitude(), location.getLongitude());
+                showMarker(location.getLatitude(), location.getLongitude());
+
+
+                Log.d(TAG, "onLocationResult: " + location.getLatitude() + " \n" +
+                        location.getLongitude());
+
+
             }
-        });
-        binding.ivTraffic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (isTrafficEnable) {
-                    isTrafficEnable = false;
-                    binding.ivTraffic.setImageResource(R.drawable.ic_baseline_map_24);
-                    if (map != null) {
-                        map.setTrafficEnabled(false);
-                    }
-                } else {
-                    isTrafficEnable = true;
-                    binding.ivTraffic.setImageResource(R.drawable.ic_traffic);
-                    if (map != null) {
-                        map.setTrafficEnabled(true);
-                    }
-                }
-            }
-        });
-        binding.ivPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDestinationDialog();
-            }
-        });
-        binding.ivLimit.setOnClickListener(new View.OnClickListener() {
+        };
+        binding.ivMapMylocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isFromStart = false;
-                showSpeedDialog();
+                getLocationUpdates();
             }
         });
-        binding.imgZoomIn.setOnClickListener(new View.OnClickListener() {
+        binding.ivMapNon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                map.animateCamera(CameraUpdateFactory.zoomIn());
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NONE);
             }
         });
-        binding.imgZoomOut.setOnClickListener(new View.OnClickListener() {
+
+        binding.ivMapNormal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                map.animateCamera(CameraUpdateFactory.zoomOut());
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
             }
         });
-        binding.ivMap.setOnClickListener(new View.OnClickListener() {
+        binding.ivMapSatellite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (map != null) {
-                    if (mapType == 0) {
-                        mapType = 1;
-                        binding.ivMap.setImageResource(R.drawable.ic_baseline_map_24);
-                        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                    } else if (mapType == 1) {
-                        mapType = 2;
-                        binding.ivMap.setImageResource(R.drawable.ic_satellite);
-                        map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                    } else if (mapType == 2) {
-                        mapType = 3;
-                        binding.ivMap.setImageResource(R.drawable.ic_hybrid);
-                        map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-                    } else if (mapType == 3) {
-                        mapType = 0;
-                        binding.ivMap.setImageResource(R.drawable.ic_terrain);
-                        map.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                    }
-
-                }
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
             }
         });
-        geocoder = new Geocoder(getContext(), Locale.getDefault());
-
-        int mapStatus = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext());
-
-        if (mapStatus != ConnectionResult.SUCCESS) {
-            int requestCode = 10;
-            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, mapStatus, requestCode);
-            dialog.show();
-        }
-
-        maxSpeed = sharedpreferences.getFloat("maxSpeed", 80);
-
-        checkGps();
-        locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-        if (locationManager != null && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-
-        }
-        if (!status) {
-            bindService();
-        }
+        binding.ivMapTerrian.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+            }
+        });
+        binding.ivMapHybrid.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGoogleMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            }
+        });
         return view;
     }
 
@@ -265,673 +167,282 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(this::onMapReady);
+            mapFragment.getMapAsync(this);
         }
     }
 
 
-    void bindService() {
+//    private void batchLocationButtonClicked(View view) {
+//        Intent intent = new Intent(getContext(), BatchLocationActivity.class);
+//        startActivity(intent);
+//    }
 
-        getContext().startService(new Intent(context, LocationServiceRoute.class));
-    }
-
-    void checkGps() {
-        locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-        if (locationManager != null && !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-
-            showGPSDisabledAlertToUser();
-        }
-    }
-
-    private void showGPSDisabledAlertToUser() {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-        alertDialogBuilder.setMessage("Enable GPS to use application")
-                .setCancelable(false)
-                .setPositiveButton("Enable GPS",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Intent callGPSSettingIntent = new Intent(
-                                        android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivity(callGPSSettingIntent);
-                            }
-                        });
-        alertDialogBuilder.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alert = alertDialogBuilder.create();
-        alert.show();
-    }
-
-    void unbindService() {
-//        if (!status)
-//        {
-//            return;
-//        }
-        try {
-
-//            if (sc != null)
-//            {
-//                unbindService(sc);
-//                status = false;
-//            }
-            getContext().stopService(new Intent(context, LocationServiceRoute.class));
-
-//            Intent intent = new Intent(context, LocationServiceRoute.class);
-//            intent.setAction(LocationServiceRoute.STOP_SERVICE);
-//            startService(intent);
-        } catch (Exception ignored) {
-        }
-    }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == VOICE_REQUEST && data != null) {
-                String address = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
-                try {
-                    if (address == null || address.equals("")) {
-                        Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    completeTextView.setText(address);
-                    completeTextView.setSelection(completeTextView.length());
+    public void onResume() {
+        super.onResume();
 
-                } catch (Exception ignored) {
-
-                }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getLocationUpdates();
             }
-        }
-
+        }, 5000);
     }
 
-    private void showSpeedDialog() {
+    private void geoLocate(View view) {
+        hideSoftKeyboard(view);
+
+        String locationName = binding.etAddress.getText().toString();
+
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+
         try {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.speedlimit_dialog, null, false);
-            final EditText speedLimit = view.findViewById(R.id.speed_limit);
-            speedLimit.setText(maxSpeed + "");
-            speedLimit.setSelection(speedLimit.length());
-//            speedLimit.setSelected(true);
-//            speedLimit.setSelectAllOnFocus(true);
-            view.findViewById(R.id.go).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (speedLimit.getText().toString().equals("")) {
-                        Toast.makeText(getContext(), "Please enter speed limit", Toast.LENGTH_SHORT).show();
-                    } else {
-                        maxSpeed = Float.parseFloat(speedLimit.getText().toString());
-                        SharedPreferences.Editor editor = sharedpreferences.edit();
-                        editor.putFloat("maxSpeed", maxSpeed);
-                        editor.apply();
-                        mDialog.dismiss();
-                        if (isFromStart && !sharedpreferences.getString("address", "").equals("")) {
-                            showLoadPreviousDialog(sharedpreferences.getString("address", ""));
-                        }
-                    }
-                }
-            });
+            List<Address> addressList = geocoder.getFromLocationName(locationName, 1);
 
-            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
-            mDialog.setContentView(view);
-            mDialog.setCancelable(true);
-            mDialog.setCanceledOnTouchOutside(false);
-            if (mDialog.getWindow() != null) {
-                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                mDialog.getWindow().setGravity(Gravity.CENTER);
+            if (addressList.size() > 0) {
+                Address address = addressList.get(0);
+
+                gotoLocation(address.getLatitude(), address.getLongitude());
+
+                showMarker(address.getLatitude(), address.getLongitude());
+
+                Toast.makeText(getContext(), address.getLocality(), Toast.LENGTH_SHORT).show();
+
+                Log.d(TAG, "geoLocate: Locality: " + address.getLocality());
             }
-            mDialog.show();
-        } catch (Exception ignored) {
-        }
-    }
 
-    @SuppressLint("SetTextI18n")
-    private void showLoadPreviousDialog(final String destination) {
-        try {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.showloadprevous_dialog, null, false);
-            final TextView tvDestination = view.findViewById(R.id.tvMessage);
-            tvDestination.setText("Destination: " + destination);
-            view.findViewById(R.id.btnload).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mDialog.dismiss();
-                    setLatLng(destination);
-                }
-            });
-            view.findViewById(R.id.btncancel).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDialog.dismiss();
-
-                }
-            });
-
-            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
-            mDialog.setContentView(view);
-            mDialog.setCancelable(true);
-            mDialog.setCanceledOnTouchOutside(false);
-            if (mDialog.getWindow() != null) {
-                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                mDialog.getWindow().setGravity(Gravity.CENTER);
+            for (Address address : addressList) {
+                Log.d(TAG, "geoLocate: Address: " + address.getAddressLine(address.getMaxAddressLineIndex()));
             }
-            mDialog.show();
-        } catch (Exception ignored) {
-        }
-    }
 
-    private void showDestinationDialog() {
-        try {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.destination_dialog, null, false);
-            view.findViewById(R.id.go).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (completeTextView.getText().toString().equals("")) {
-                        Toast.makeText(getContext(), "Please enter destination first", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    setLatLng(completeTextView.getText().toString());
-                    mDialog.dismiss();
-                }
-            });
-            view.findViewById(R.id.voice).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-                        if (getContext().getPackageManager().queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0)
-                                .size() != 0) {
-                            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Where you want to go! Speak Now!");
-                            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
-                            startActivityForResult(intent, VOICE_REQUEST);
-                        } else {
-                            AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
-                            alertDialog.setTitle("Warning!");
-                            alertDialog.setMessage("Voice Recognition Engine on Your Device is Not Active");
-                            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                            alertDialog.show();
-                        }
-                    } catch (Exception ignored) {
-                    }
-                }
-            });
-            completeTextView = view.findViewById(R.id.Destination);
-            completeTextView.setAdapter(new Filter(MapsFragment.this, getContext(), R.layout.adp_auto_complete));
-            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
-            mDialog.setContentView(view);
-            mDialog.setCancelable(true);
-            mDialog.setCanceledOnTouchOutside(false);
-            if (mDialog.getWindow() != null) {
-                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                mDialog.getWindow().setGravity(Gravity.CENTER);
-            }
-            mDialog.show();
-        } catch (Exception ignored) {
-        }
-    }
 
-    public ArrayList getOptions(String str) {
-        HttpURLConnection httpURLConnection;
-        Throwable th;
-        HttpURLConnection httpURLConnection2 = null;
-        StringBuilder stringBuilder = new StringBuilder();
-        try {
-            String stringBuilder2 = "https://maps.googleapis.com/maps/api/place/autocomplete/json" +
-                    "?key=AIzaSyAg2ClfHcXyv-Yp2RUrERF6Hfn53G0ntHw" +
-                    "&input=" + URLEncoder.encode(str, "utf8");
-            httpURLConnection = (HttpURLConnection) new URL(stringBuilder2).openConnection();
-            try {
-                InputStreamReader inputStreamReader = new InputStreamReader(httpURLConnection.getInputStream());
-                char[] cArr = new char[1024];
-                while (true) {
-                    int read = inputStreamReader.read(cArr);
-                    if (read == -1) {
-                        break;
-                    }
-                    stringBuilder.append(cArr, 0, read);
-                }
-                httpURLConnection.disconnect();
-                try {
-                    JSONArray jSONArray = new JSONObject(stringBuilder.toString()).getJSONArray("predictions");
-                    ArrayList arrayList = new ArrayList(jSONArray.length());
-                    int i = 0;
-                    while (i < jSONArray.length()) {
-                        try {
-                            System.out.println(jSONArray.getJSONObject(i).getString("description"));
-                            System.out.println("============================================================");
-                            arrayList.add(jSONArray.getJSONObject(i).getString("description"));
-                            i++;
-                        } catch (JSONException e) {
-                            return arrayList;
-                        }
-                    }
-                    return arrayList;
-                } catch (JSONException e2) {
-                    return null;
-                }
-            } catch (MalformedURLException e3) {
-                httpURLConnection.disconnect();
-                return null;
-            } catch (IOException e4) {
-                httpURLConnection.disconnect();
-                return null;
-            } catch (Throwable th2) {
-                httpURLConnection2 = httpURLConnection;
-                th = th2;
-                if (httpURLConnection2 != null) {
-                    httpURLConnection2.disconnect();
-                }
-                throw th;
-            }
-        } catch (MalformedURLException e5) {
-            return null;
-        } catch (IOException e6) {
-            return null;
-        } catch (Throwable th4) {
-            if (httpURLConnection2 != null) {
-                httpURLConnection2.disconnect();
-            }
+        } catch (IOException e) {
+
 
         }
 
-        return null;
+
     }
 
-    private String getDirectionsUrl(LatLng origin, LatLng dest) {
-
-        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-        String sensor = "sensor=false";
-        String parameters = str_origin + "&" + str_dest + "&" + sensor;
-        String output = "json";
-        return "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+    private void showMarker(double lat, double lng) {
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(new LatLng(lat, lng));
+        mGoogleMap.addMarker(markerOptions);
     }
 
-    /**
-     * A method to download json data from url
-     */
-    private String downloadUrl(String strUrl) throws IOException {
-        String data = "";
-        InputStream iStream = null;
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL(strUrl);
+    private void hideSoftKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
 
-            // Creating an http connection to communicate with url
-            urlConnection = (HttpURLConnection) url.openConnection();
+    private void initGoogleMap() {
 
-            // Connecting to url
-            urlConnection.connect();
+        if (isServicesOk()) {
+            if (isGPSEnabled()) {
+                if (checkLocationPermission()) {
+                    Toast.makeText(getContext(), "Ready to Map", Toast.LENGTH_SHORT).show();
 
-            // Reading data from url
-            iStream = urlConnection.getInputStream();
+                    SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager()
+                            .findFragmentById(R.id.map);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
-            StringBuilder sb = new StringBuilder();
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-
-            data = sb.toString();
-
-            br.close();
-
-        } catch (Exception e) {
-            Log.d(TAG, e.toString());
-        } finally {
-            if (iStream != null) {
-                iStream.close();
-            }
-            if (urlConnection != null) {
-                urlConnection.disconnect();
+                    if (supportMapFragment != null) {
+                        supportMapFragment.getMapAsync(this);
+                    }
+                } else {
+                    requestLocationPermission();
+                }
             }
         }
-        return data;
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        // Initializing
-        map = googleMap;
+        Log.d(TAG, "onMapReady: map is showing on the screen");
+
+        mGoogleMap = googleMap;
+        gotoLocation(ISLAMABAD_LAT, ISLAMABAD_LNG);
+//        mGoogleMap.setMyLocationEnabled(true);
+
+        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
+        mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
+
+    }
+
+    private void gotoLocation(double lat, double lng) {
+
+        LatLng latLng = new LatLng(lat, lng);
+
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
+
+        mGoogleMap.moveCamera(cameraUpdate);
+//        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+    }
+
+    private boolean isGPSEnabled() {
+
+        LocationManager locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+
+        boolean providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+        if (providerEnabled) {
+            return true;
+        } else {
+
+            androidx.appcompat.app.AlertDialog alertDialog = new AlertDialog.Builder(getContext())
+                    .setTitle("GPS Permissions")
+                    .setMessage("GPS is required for this app to work. Please enable GPS.")
+                    .setPositiveButton("Yes", ((dialogInterface, i) -> {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivityForResult(intent, GPS_REQUEST_CODE);
+                    }))
+                    .setCancelable(false)
+                    .show();
+
+        }
+
+        return false;
+    }
+
+    private boolean checkLocationPermission() {
+
+        return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean isServicesOk() {
+
+        GoogleApiAvailability googleApi = GoogleApiAvailability.getInstance();
+
+        int result = googleApi.isGooglePlayServicesAvailable(getContext());
+
+        if (result == ConnectionResult.SUCCESS) {
+            return true;
+        } else if (googleApi.isUserResolvableError(result)) {
+            Dialog dialog = googleApi.getErrorDialog(this, result, PLAY_SERVICES_ERROR_CODE, task ->
+                    Toast.makeText(getContext(), "Dialog is cancelled by User", Toast.LENGTH_SHORT).show());
+            dialog.show();
+        } else {
+            Toast.makeText(getContext(), "Play services are required by this application", Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+
+    private void requestLocationPermission() {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
+
+
+    private void getCurrentLocation() {
+
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        map.setMyLocationEnabled(true);
-        mMarkerPoints = new ArrayList<>();
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mLocationClient.getLastLocation().addOnCompleteListener(task -> {
 
-        if (map != null && AppController.getAppInstance().getGlobalLocation() != null) {
-            Location location = AppController.getAppInstance().getGlobalLocation();
-            LatLng point = new LatLng(location.getLatitude(), location.getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLng(point));
-            map.animateCamera(CameraUpdateFactory.zoomTo(18));
+            if (task.isSuccessful()) {
+                Location location = task.getResult();
+                gotoLocation(location.getLatitude(), location.getLongitude());
+            } else {
+                Log.d(TAG, "getCurrentLocation: Error: " + task.getException().getMessage());
+            }
+
+        });
+
+    }
+
+    private void getLocationUpdates() {
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(1000);
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
         }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                Log.d(TAG, "run: done");
+
+                if (ActivityCompat.checkSelfPermission(
+                        getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "run: done");
+
+                    return;
+                }
+                mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
+
+            }
+        }).start();
 
 
     }
 
-    private void drawMarker(LatLng point) {
-        if (map == null) {
-            return;
-        }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        mMarkerPoints.add(point);
-        MarkerOptions options = new MarkerOptions();
-        options.position(point);
-        options.title(getAddress(point));
-        if (mMarkerPoints.size() == 1) {
-            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_mylocation));
-        } else if (mMarkerPoints.size() == 2) {
-            options.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_location_pin));
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted = true;
+            Toast.makeText(getContext(), "Permission granted", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "Permission not granted", Toast.LENGTH_SHORT).show();
         }
-        map.addMarker(options);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GPS_REQUEST_CODE) {
+
+            LocationManager locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+
+            boolean providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            if (providerEnabled) {
+                Toast.makeText(getContext(), "GPS is enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "GPS not enabled. Unable to show user location", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Toast.makeText(getContext(), "Connected to Location Services", Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     @Override
     public void onPause() {
-
         super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-
-        super.onResume();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-    }
-
-    private String getAddress(LatLng location) {
-        try {
-            addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1); // Here 1 represent max location
-            if (addresses != null) {
-                Address returnedAddress = addresses.get(0);
-                StringBuilder strReturnedAddress = new StringBuilder("");
-                if (returnedAddress.getMaxAddressLineIndex() == 0) {
-                    if (returnedAddress.getAddressLine(0) != null && !returnedAddress.getAddressLine(0).equals("")) {
-                        strReturnedAddress.append(returnedAddress.getAddressLine(0)).append("\n");
-                    }
-                } else {
-                    for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
-                        strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
-                    }
-                }
-                return strReturnedAddress.toString();
-//                Log.w(TAG, "My Current loction address" + strReturnedAddress.toString());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
-
-    private void setLatLng(String address) {
-        try {
-            if (address == null || address.equals("")) {
-                Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            try {
-                List<Address> addresses = geocoder.getFromLocationName(address, 1);
-                if (addresses != null) {
-
-                    Address locationAddress = addresses.get(0);
-                    if (AppController.getAppInstance().getGlobalLocation() == null) {
-                        Toast.makeText(getContext(), "Starting point not found", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (map == null) {
-                        return;
-                    }
-                    if (locationAddress == null) {
-                        Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putString("address", address);
-                    editor.apply();
-                    Location location = AppController.getAppInstance().getGlobalLocation();
-                    LatLng orign = new LatLng(location.getLatitude(), location.getLongitude());
-                    drawMarker(orign);
-                    LatLng dest = new LatLng(locationAddress.getLatitude(), locationAddress.getLongitude());
-                    drawMarker(dest);
-                    String url = getDirectionsUrl(orign, dest);
-                    new DownloadTask().execute(url);
-                } else {
-                    Toast.makeText(getContext(), "Address not found\nPlease Try Again", Toast.LENGTH_SHORT).show();
-                    Log.w("", "My Current loction address,No Address returned!");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.w("", "My Current loction address,Canont get Address!");
-            }
-
-        } catch (Exception ignored) {
-
-        }
-    }
-
-    private void ExitDialog() {
-
-        try {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.notification_dialog, null, false);
-            view.findViewById(R.id.btnAccept).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-
-                        mDialog.dismiss();
-
-                    } catch (Exception ignored) {
-                    }
-
-                }
-            });
-            view.findViewById(R.id.btnstop).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-//                    if (status)
-//                    {
-                    unbindService();
-//                    }
-                    mDialog.dismiss();
-
-                }
-            });
-
-
-            mDialog = new Dialog(getContext(), R.style.MaterialDialogSheet);
-            mDialog.setContentView(view);
-            mDialog.setCancelable(true);
-            mDialog.setCanceledOnTouchOutside(false);
-            if (mDialog.getWindow() != null) {
-                mDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                mDialog.getWindow().setGravity(Gravity.BOTTOM);
-            }
-            mDialog.show();
-        } catch (Exception ignored) {
-        }
-    }
-
-    class Filter extends ArrayAdapter implements Filterable {
-        MapsFragment drawPath;
-        private ArrayList arrayList;
-
-        Filter(MapsFragment routeHome, Context context, int i) {
-            super(context, i);
-            this.drawPath = routeHome;
-
-        }
-
-        String m13046a(int i) {
-            return this.arrayList.get(i).toString();
-        }
-
-        public int getCount() {
-            return this.arrayList.size();
-        }
-
-        @NonNull
-        public android.widget.Filter getFilter() {
-            return new filterClass(this);
-        }
-
-        public /* synthetic */ Object getItem(int i) {
-            return m13046a(i);
-        }
-
-        class filterClass extends android.widget.Filter {
-            Filter filter;
-
-            filterClass(Filter filter) {
-                this.filter = filter;
-            }
-
-            protected FilterResults performFiltering(CharSequence charSequence) {
-                FilterResults filterResults = new FilterResults();
-                if (charSequence != null) {
-                    this.filter.arrayList = this.filter.drawPath.getOptions(charSequence.toString());
-                    filterResults.values = this.filter.arrayList;
-                    filterResults.count = this.filter.arrayList.size();
-                }
-                return filterResults;
-            }
-
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                if (filterResults == null || filterResults.count <= 0) {
-                    this.filter.notifyDataSetInvalidated();
-                } else {
-                    this.filter.notifyDataSetChanged();
-                }
-            }
-        }
-    }
-
-    /**
-     * A class to download data from Google Directions URL
-     */
-    @SuppressLint("StaticFieldLeak")
-    private class DownloadTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... url) {
-
-            Log.d(TAG, "DownloadTask doInBackground: ");
-            String data = "";
-
-            try {
-                data = downloadUrl(url[0]);
-            } catch (Exception e) {
-                Log.d("Background Task", e.toString());
-            }
-            return data;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            Log.d(TAG, "DownloadTask onPostExecute: ");
-            new ParserTask().execute(result);
-        }
-    }
-
-    /**
-     * A class to parse the Google Directions in JSON format
-     */
-    @SuppressLint("StaticFieldLeak")
-    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
-        @Override
-        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
-            Log.d(TAG, "ParserTask doInBackground: ");
-            JSONObject jObject;
-            List<List<HashMap<String, String>>> routes = null;
-            try {
-                jObject = new JSONObject(jsonData[0]);
-                // Starts parsing data
-                routes = new DirectionsJSONParser().parse(jObject);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return routes;
-        }
-
-        // Executes in UI thread, after the parsing process
-        @Override
-        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            try {
-                if (map == null) {
-                    return;
-                }
-                Log.d(TAG, "ParserTask onPostExecute: ");
-                System.gc();
-                ArrayList<LatLng> points;
-                PolylineOptions lineOptions = null;
-
-                // Traversing through all the routes
-                if (result != null && result.size() > 0) {
-                    for (int i = 0; i < result.size(); i++) {
-                        points = new ArrayList<>();
-                        lineOptions = new PolylineOptions();
-
-                        // Fetching i-th route
-                        List<HashMap<String, String>> path = result.get(i);
-                        if (path != null && path.size() > 0) {
-                            // Fetching all the points in i-th route
-                            for (int j = 0; j < path.size(); j++) {
-                                HashMap<String, String> point = path.get(j);
-                                if (point != null) {
-                                    double lat = Double.parseDouble(point.get("lat"));
-                                    double lng = Double.parseDouble(point.get("lng"));
-                                    LatLng position = new LatLng(lat, lng);
-                                    points.add(position);
-                                }
-                            }
-                        }
-
-                        if (points.size() > 0) {
-                            // Adding all the points in the route to LineOptions
-                            lineOptions.addAll(points);
-                            lineOptions.width(5);
-                            lineOptions.color(Color.GREEN);
-                        }
-
-                    }
-                }
-
-                if (lineOptions != null) {
-                    // Drawing polyline in the Google Map for the i-th route
-                    map.addPolyline(lineOptions);
-                }
-                mapBusy = false;
-            } catch (Exception ignored) {
-            }
+        if (mLocationCallback != null) {
+            mLocationClient.removeLocationUpdates(mLocationCallback);
         }
     }
 }

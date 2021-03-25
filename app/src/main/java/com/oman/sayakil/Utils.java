@@ -17,43 +17,12 @@ import java.util.List;
 import java.util.Locale;
 
 public class Utils {
-    public static final long LOCATION_INTERVAL = 10000;
-    public static final long FASTEST_LOCATION_INTERVAL = 5000;
     public static final int UPDATE_INTERVAL = 2 * 1000;
     public static final int FASTEST_INTERVAL = 1000;
-    public static String RELEASE_TOPIC_FOR_ACCOUNT = "topic_trendingapps";
-    public static String DEBUG_TOPIC_FOR_ACCOUNT = "test_topic_trendingapps";
-    public static String INAPPproductId ="com.trending.gps.map.navigation";
 
-    public static String GetCustomDate(String s)
-    {
-        return new SimpleDateFormat(s, Locale.ENGLISH).format(Calendar.getInstance().getTime());
-    }
 
-    public static boolean isLocationEnabled(Context context)
-    {
-        int locationMode;
-        String locationProviders;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-        {
-            try
-            {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-            }
-            catch (Settings.SettingNotFoundException e)
-            {
-                e.printStackTrace();
-                return false;
-            }
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
-        }
-        else
-        {
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
-        }
-    }
+
 
     public static boolean isNetworkAvailable(Context context)
     {
@@ -119,20 +88,6 @@ public class Utils {
         return strAdd;
     }
 
-    public static void locationNotFound(Context c)
-    {
-        Toast.makeText(c, "Turn on location first!", Toast.LENGTH_SHORT).show();
-    }
-
-    public static void wifiNotFound(Context c)
-    {
-        Toast.makeText(c, "No internet Connection!", Toast.LENGTH_SHORT).show();
-    }
-
-    public static void mapeBusy(Context context)
-    {
-        Toast.makeText(context, "Searching route...", Toast.LENGTH_SHORT).show();
-    }
 
     public static void openWifi(Context c)
     {
