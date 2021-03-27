@@ -2,7 +2,6 @@ package com.oman.sayakil.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -17,7 +16,6 @@ import com.oman.sayakil.databinding.ActivityMainBinding;
 import com.oman.sayakil.ui.bottom_fragments.CycleFragment;
 import com.oman.sayakil.ui.bottom_fragments.MapsFragment;
 import com.oman.sayakil.ui.bottom_fragments.RefreshFragment;
-import com.oman.sayakil.ui.bottom_fragments.SettingsFragment;
 import com.oman.sayakil.ui.drawer_fragments.BillingStatementsFragment;
 import com.oman.sayakil.ui.drawer_fragments.MessageFragment;
 import com.oman.sayakil.ui.drawer_fragments.PaymentInformationFragment;
@@ -190,13 +188,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .replace(R.id.nav_host_fragment, new RefreshFragment())
                         .commit();
                 break;
-
-            case R.id.nav_bottom_setting:
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new SettingsFragment())
-                        .commit();
-                break;
-
 
         }
 

@@ -61,17 +61,17 @@ import static android.content.Context.LOCATION_SERVICE;
 public class MapsFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
-
+    private static final String TAG = "MapsFragment";
     private FragmentMapsBinding binding;
 
-    public static final int DEFAULT_ZOOM = 15;
+    public static final int DEFAULT_ZOOM = 18;
     private final double ISLAMABAD_LAT = 33.690904;
     private final double ISLAMABAD_LNG = 73.051865;
 
     public static final int PERMISSION_REQUEST_CODE = 9001;
     private static final int PLAY_SERVICES_ERROR_CODE = 9002;
     public static final int GPS_REQUEST_CODE = 9003;
-    public static final String TAG = "MapDebug";
+
     private boolean mLocationPermissionGranted;
 
 
@@ -181,13 +181,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                getLocationUpdates();
-            }
-        }, 5000);
     }
 
     private void geoLocate(View view) {
