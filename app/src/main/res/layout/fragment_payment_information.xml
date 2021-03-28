@@ -38,61 +38,80 @@
         android:text="Card Number"
         android:textSize="16sp" />
 
-    <EditText
-        android:id="@+id/et_card_number"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Enter card number"
-        android:inputType="number" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/cardNumberEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="-0.25dp"
+            android:background="@drawable/bg_card_number_edit_text"
+            android:drawableRight="@drawable/ic_card_number"
+            android:hint="@string/card_number"
+            android:inputType="phone"
+            android:padding="16dp"
+            android:textColor="@android:color/black"
+            android:textColorHint="@color/colorGray"
+            android:textSize="14sp"
+            tools:ignore="LabelFor,NegativeMargin" />
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="Expiration date"
-                android:textSize="16sp" />
+            android:layout_marginTop="-0.25dp"
+            android:orientation="horizontal"
+            tools:ignore="NegativeMargin">
 
             <EditText
-                android:id="@+id/et_expiry_date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="date" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:text="Security code"
-                android:textSize="16sp" />
+                android:id="@+id/cardDateEditText"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginRight="-0.25dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_card_date_edit_text"
+                android:clickable="false"
+                android:cursorVisible="false"
+                android:drawableRight="@drawable/ic_card_date"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:hint="MM/YY"
+                android:inputType="date"
+                android:padding="16dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/colorGray"
+                android:textSize="14sp"
+                tools:ignore="LabelFor,RtlHardcoded" />
 
             <EditText
-                android:id="@+id/et_security_code"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="date" />
+                android:id="@+id/cardCVCEditText"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="-0.25dp"
+                android:layout_weight="1"
 
+                android:background="@drawable/bg_card_cvc_edit_text"
+                android:drawableRight="@drawable/ic_card_cvc"
+                android:hint="CVC"
+                android:inputType="number"
+                android:maxLength="3"
+                android:padding="16dp"
+                android:textColor="@android:color/black"
+                android:textColorHint="@color/colorGray"
+                android:textSize="14sp"
+                tools:ignore="LabelFor,RtlHardcoded" />
         </LinearLayout>
-
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btn_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="Save" />
 
 </LinearLayout>

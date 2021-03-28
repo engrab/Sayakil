@@ -20,10 +20,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.ActivityProfileBinding;
-import com.oman.sayakil.pref.SharedPreferencesManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -58,32 +58,9 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(view);
         setSupportActionBar(binding.toolbar);
 
-//        document.collection(String.valueOf(FirebaseAuth.getInstance().getCurrentUser())).document();
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        String email = null;
-        String phoneNumber = null;
+        createAccountOnFireStore();
 
-
-        if (currentUser != null) {
-            email = currentUser.getEmail();
-            phoneNumber = currentUser.getPhoneNumber();
-        }
-        if (email != null && !email.isEmpty()) {
-
-            document = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid());
-        }
-        else {
-            if (phoneNumber != null) {
-
-                document = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid());
-            }
-            else {
-                Toast.makeText(this, "Please Authenticate your self", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-
-        getData();
+        getDataFromFireStore();
 
         adapter = ArrayAdapter.createFromResource(
                 this, R.array.gender_array, android.R.layout.simple_spinner_item);
@@ -118,6 +95,9 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
     }
+
+
+
     private void updateLabel() {
         String myFormat = "MM/dd/yy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
@@ -134,12 +114,63 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId()==R.id.menu_save){
-            saveDataFirstore();
+            saveDataOnFirstore();
         }
         return super.onOptionsItemSelected(item);
     }
+    private void createAccountOnFireStore() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String email = null;
+        String phoneNumber = null;
 
-    private void getData(){
+
+        if (currentUser != null) {
+            email = currentUser.getEmail();
+            phoneNumber = currentUser.getPhoneNumber();
+        }
+        if (email != null && !email.isEmpty()) {
+
+            document = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid());
+        }
+        else {
+            if (phoneNumber != null) {
+
+                document = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid());
+            }
+            else {
+                Toast.makeText(this, "Please Authenticate your self", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+    private void saveDataOnFirstore(){
+
+        HashMap<String , Object> data = new HashMap<>();
+
+        data.put(KEY_FIRST_NAME, binding.etFirstName.getText().toString());
+        data.put(KEY_LAST_NAME, binding.etLastName.getText().toString());
+        data.put(KEY_DOB, binding.etDateBirth.getText().toString());
+        data.put(KEY_PHONE_NUMBER, binding.etPhoneNumber.getText().toString());
+        data.put(KEY_PHONE_NUMBER2, binding.etSecondPhoneNumber.getText().toString());
+        data.put(KEY_EMAIL, binding.etEmail.getText().toString());
+        data.put(KEY_CONFORM_EMAIL, binding.etConformEmail.getText().toString());
+        data.put(KEY_ADDRESS1, binding.etLine1.getText().toString());
+        data.put(KEY_ADDRESS2, binding.etLine2.getText().toString());
+        data.put(KEY_ZIP_CODE, binding.etZip.getText().toString());
+        data.put(KEY_PROVINCE, binding.etProvince.getText().toString());
+        data.put(KEY_GENDER, binding.spGender.getSelectedItemPosition());
+
+
+        document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()){
+                    Toast.makeText(ProfileActivity.this, "successfully inserted data", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+    private void getDataFromFireStore(){
         document.get(Source.DEFAULT).addOnCompleteListener(this,new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -173,33 +204,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
-    private void saveDataFirstore(){
 
-        HashMap<String , Object> data = new HashMap<>();
-
-        data.put(KEY_FIRST_NAME, binding.etFirstName.getText().toString());
-        data.put(KEY_LAST_NAME, binding.etLastName.getText().toString());
-        data.put(KEY_DOB, binding.etDateBirth.getText().toString());
-        data.put(KEY_PHONE_NUMBER, binding.etPhoneNumber.getText().toString());
-        data.put(KEY_PHONE_NUMBER2, binding.etSecondPhoneNumber.getText().toString());
-        data.put(KEY_EMAIL, binding.etEmail.getText().toString());
-        data.put(KEY_CONFORM_EMAIL, binding.etConformEmail.getText().toString());
-        data.put(KEY_ADDRESS1, binding.etLine1.getText().toString());
-        data.put(KEY_ADDRESS2, binding.etLine2.getText().toString());
-        data.put(KEY_ZIP_CODE, binding.etZip.getText().toString());
-        data.put(KEY_PROVINCE, binding.etProvince.getText().toString());
-        data.put(KEY_GENDER, binding.spGender.getSelectedItemPosition());
-
-
-        document.set(data).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(ProfileActivity.this, "successfully inserted data", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
 
 //    private void setPref() {
 //        SharedPreferencesManager.getInstance(this).setFirstName(binding.etFirstName.getText().toString());

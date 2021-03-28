@@ -9,36 +9,50 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Source;
-import com.oman.sayakil.Utils;
+import com.google.firebase.firestore.SetOptions;
+import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.FragmentCycleBinding;
 import com.oman.sayakil.databinding.ItemCycleBinding;
 import com.oman.sayakil.model.CycleModel;
+import com.razorpay.Checkout;
+import com.razorpay.PaymentResultListener;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-import static com.firebase.ui.auth.AuthUI.getApplicationContext;
-
-public class CycleFragment extends Fragment {
+public class CycleFragment extends Fragment implements PaymentResultListener {
 
     private static final String TAG = "CycleFragment";
     private FragmentCycleBinding binding;
     private List<CycleModel> mList;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CycleAdapter mAdapter;
+    private DocumentReference document;
+    public static final String KEY_TRANSCATION_ID="t_id";
+
+    int amount = 100;
+
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -48,7 +62,7 @@ public class CycleFragment extends Fragment {
         initList();
         getListItems();
         startRecyclerView();
-
+        createAccountOnFireStore();
 
 //        if (Utils.isNetworkAvailable(getContext())) {
 //            binding.tvNointernet.setVisibility(View.GONE);
@@ -109,14 +123,93 @@ public class CycleFragment extends Fragment {
 
     private void startRecyclerView() {
         mAdapter = new CycleAdapter(getContext(), mList);
-        binding.rvCycle.setLayoutManager(new LinearLayoutManager(getContext()));
+        binding.rvCycle.setLayoutManager(new GridLayoutManager(getContext(),2));
         binding.rvCycle.setAdapter(mAdapter);
+    }
+
+    private void createAccountOnFireStore() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String email = null;
+        String phoneNumber = null;
+
+
+        if (currentUser != null) {
+            email = currentUser.getEmail();
+            phoneNumber = currentUser.getPhoneNumber();
+        }
+        if (email != null && !email.isEmpty()) {
+
+            document = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid());
+        } else {
+            if (phoneNumber != null) {
+
+                document = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid());
+            } else {
+                Toast.makeText(getContext(), "Please Authenticate your self", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+
+    private void saveDataOnFirstore(String transation) {
+
+        HashMap<String, Object> data = new HashMap<>();
+
+        data.put(KEY_TRANSCATION_ID, transation);
+
+
+        document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getContext(), "successfully inserted transcation id", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void razorPay(int money){
+        Checkout checkout = new Checkout();
+        checkout.setKeyID("rzp_test_6lbQOCxNc8Or5W");
+        checkout.setImage(R.mipmap.ic_launcher);
+
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put("name", "Sayakil Studio");
+            jsonObject.put("description", "Test Payment");
+            jsonObject.put("theme.color", "#0093DD");
+            jsonObject.put("currency", "INR");
+            jsonObject.put("amount", money);
+            jsonObject.put("prefill.contact", "03477141224");
+            jsonObject.put("prefill.email", "sayakilstudio@gmail.com");
+            checkout.open(getActivity(), jsonObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+
+    @Override
+    public void onPaymentSuccess(String s) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Payment ID");
+        builder.setMessage(s);
+        builder.show();
+        saveDataOnFirstore(s);
+    }
+
+    @Override
+    public void onPaymentError(int i, String s) {
+
+        saveDataOnFirstore(s);
     }
 
     private class CycleAdapter extends RecyclerView.Adapter<CycleAdapter.ViewHolder> {
@@ -139,6 +232,16 @@ public class CycleFragment extends Fragment {
         public void onBindViewHolder(@NonNull CycleAdapter.ViewHolder holder, int position) {
 
             holder.bindingCycle.tvTitle.setText(cycleList.get(position).getTitle());
+            holder.bindingCycle.tvPrice.setText(String.valueOf(cycleList.get(position).getPrice()));
+            Picasso.get().load(cycleList.get(position).getImage()).into(holder.bindingCycle.ivImage);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    amount = Math.round(Float.parseFloat(String.valueOf(cycleList.get(position).getPrice()))*amount);
+                    razorPay(amount);
+                }
+            });
+
         }
 
         @Override
@@ -153,6 +256,7 @@ public class CycleFragment extends Fragment {
                 super(binding.getRoot());
                 bindingCycle = binding;
             }
+
         }
     }
 

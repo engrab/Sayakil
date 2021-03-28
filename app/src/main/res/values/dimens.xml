@@ -8,6 +8,14 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="route_btn_margin_right">0dp</dimen>
 
+
+    <dimen name="zero">0dp</dimen>
+
+    <dimen name="half_dp">0.5dp</dimen>
+
+    <dimen name="edit_text_radius">3dp</dimen>
+
+
     <dimen name="account_note_padding">8dp</dimen>
     <dimen name="action_bar_height">56dp</dimen>
     <dimen name="action_bar_height_w_dialog_title_top_bottom_margin">80dp</dimen>

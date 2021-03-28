@@ -427,7 +427,7 @@
     <string name="call_btn">Call</string>
     <string name="cancel_btn">CANCEL</string>
     <string name="card_holder_name">Card holder name</string>
-    <string name="card_number">Credit card number</string>
+    <string name="card_number">1234-1234-1234-1234</string>
     <string name="cc_expiry_date_title">Credit card expiration</string>
     <string name="change_btn">CHANGE</string>
     <string name="change_item">Change</string>

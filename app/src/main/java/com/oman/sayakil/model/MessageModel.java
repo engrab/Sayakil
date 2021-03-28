@@ -1,17 +1,20 @@
 package com.oman.sayakil.model;
 
 public class MessageModel {
-    private String message;
+    private String notify;
 
-    public MessageModel(String message) {
-        this.message = message;
+    public MessageModel() {
     }
 
-    public String getMessage() {
-        return message;
+    public MessageModel(String notify) {
+        this.notify = notify;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public String getNotify() {
+        return notify;
+    }
+
+    public void setNotify(String notify) {
+        this.notify = notify;
     }
 }
