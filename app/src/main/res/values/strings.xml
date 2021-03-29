@@ -1191,4 +1191,5 @@
     <string name="monthly_memeber_ship">Unlimited number of trips , first 60 mintes of each trips are included in monthly membership , after which additional usaage fees apply.</string>
     <string name="yearly_memeber_ship">Unlimited number of trips , first 60 mintes of each trips are included in yearly membership , after which additional usaage fees apply.</string>
     <string name="menu_member">Member ship</string>
+    <string name="menu_key">Key</string>
 </resources>

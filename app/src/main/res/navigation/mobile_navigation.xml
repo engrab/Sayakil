@@ -20,16 +20,6 @@
         android:label="fragment_maps"
         tools:layout="@layout/fragment_maps" />
     <fragment
-        android:id="@+id/refreshFragment"
-        android:name="com.oman.sayakil.ui.bottom_fragments.RefreshFragment"
-        android:label="fragment_refresh"
-        tools:layout="@layout/fragment_refresh" />
-    <fragment
-        android:id="@+id/billingStatementsFragment"
-        android:name="com.oman.sayakil.ui.drawer_fragments.BillingStatementsFragment"
-        android:label="fragment_billing_statements"
-        tools:layout="@layout/fragment_billing_statements" />
-    <fragment
         android:id="@+id/memberShipFragment"
         android:name="com.oman.sayakil.ui.fragments.MemberShipFragment"
         android:label="fragment_member_ship"
@@ -79,4 +69,14 @@
         android:name="com.oman.sayakil.ui.activities.SignInActivity"
         android:label="activity_signin"
         tools:layout="@layout/activity_signin" />
+    <fragment
+        android:id="@+id/keyFragment"
+        android:name="com.oman.sayakil.ui.bottom_fragments.KeyFragment"
+        android:label="fragment_key"
+        tools:layout="@layout/fragment_key" />
+    <fragment
+        android:id="@+id/billingStatementsFragment"
+        android:name="com.oman.sayakil.ui.drawer_fragments.BillingStatementsFragment"
+        android:label="fragment_billing_statements"
+        tools:layout="@layout/fragment_billing_statements" />
 </navigation>

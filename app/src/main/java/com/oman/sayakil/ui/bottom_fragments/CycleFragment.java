@@ -48,7 +48,7 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CycleAdapter mAdapter;
     private DocumentReference document;
-    public static final String KEY_TRANSCATION_ID="t_id";
+    private static final String KEY_TRANSCATION_ID="t_id";
 
     int amount = 100;
 
@@ -83,6 +83,8 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
 //        } else {
 //            binding.tvNointernet.setVisibility(View.VISIBLE);
 //        }
+
+
         return view;
     }
 

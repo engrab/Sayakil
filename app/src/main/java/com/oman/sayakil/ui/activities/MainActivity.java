@@ -15,7 +15,7 @@ import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.ActivityMainBinding;
 import com.oman.sayakil.ui.bottom_fragments.CycleFragment;
 import com.oman.sayakil.ui.bottom_fragments.MapsFragment;
-import com.oman.sayakil.ui.bottom_fragments.RefreshFragment;
+import com.oman.sayakil.ui.bottom_fragments.KeyFragment;
 import com.oman.sayakil.ui.drawer_fragments.BillingStatementsFragment;
 import com.oman.sayakil.ui.drawer_fragments.MessageFragment;
 import com.oman.sayakil.ui.drawer_fragments.PaymentInformationFragment;
@@ -183,9 +183,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .commit();
                 break;
 
-            case R.id.nav_bottom_refresh:
+            case R.id.nav_bottom_key:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new RefreshFragment())
+                        .replace(R.id.nav_host_fragment, new KeyFragment())
                         .commit();
                 break;
 

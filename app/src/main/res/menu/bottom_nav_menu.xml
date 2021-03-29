@@ -9,9 +9,9 @@
         android:title="@string/menu_my_location" />
 
     <item
-        android:id="@+id/nav_bottom_refresh"
-        android:icon="@drawable/ic_baseline_refresh_24"
-        android:title="@string/menu_refresh" />
+        android:id="@+id/nav_bottom_key"
+        android:icon="@drawable/ic_key"
+        android:title="@string/menu_key" />
 
     <item
         android:id="@+id/nav_bottom_cycle"
