@@ -56,9 +56,9 @@
         tools:layout="@layout/fragment_trips" />
     <fragment
         android:id="@+id/statisticsFragment"
-        android:name="com.oman.sayakil.ui.drawer_fragments.StatisticsFragment"
+        android:name="com.oman.sayakil.ui.drawer_fragments.ContactUsFragment"
         android:label="fragment_statistics"
-        tools:layout="@layout/fragment_statistics" />
+        tools:layout="@layout/fragment_contactus" />
     <activity
         android:id="@+id/mainActivity"
         android:name="com.oman.sayakil.ui.activities.MainActivity"

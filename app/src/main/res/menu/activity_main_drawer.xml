@@ -22,14 +22,14 @@
             android:id="@+id/nav_member_ship"
             android:icon="@drawable/ic_membership"
             android:title="@string/menu_member" />
-        <item
-            android:id="@+id/nav_trips"
-            android:icon="@drawable/ic_trip"
-            android:title="@string/menu_trip" />
-        <item
-            android:id="@+id/nav_billing"
-            android:icon="@drawable/ic_billing_statement"
-            android:title="@string/menu_billing" />
+<!--        <item-->
+<!--            android:id="@+id/nav_trips"-->
+<!--            android:icon="@drawable/ic_trip"-->
+<!--            android:title="@string/menu_trip" />-->
+<!--        <item-->
+<!--            android:id="@+id/nav_billing"-->
+<!--            android:icon="@drawable/ic_billing_statement"-->
+<!--            android:title="@string/menu_billing" />-->
         <item
             android:id="@+id/nav_statistics"
             android:icon="@drawable/ic_baseline_stacked_line_chart_24"

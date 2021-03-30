@@ -14,7 +14,7 @@
     <string name="menu_payment">Payment Information</string>
     <string name="menu_trip">Trips</string>
     <string name="menu_billing">Billing Statement</string>
-    <string name="menu_statistics">Statistics</string>
+    <string name="menu_statistics">Contact Us</string>
     <string name="menu_rentle_timer">Rentle Timer</string>
     <string name="menu_logout">Logout</string>
     <string name="menu_my_location">Location</string>
@@ -1192,4 +1192,8 @@
     <string name="yearly_memeber_ship">Unlimited number of trips , first 60 mintes of each trips are included in yearly membership , after which additional usaage fees apply.</string>
     <string name="menu_member">Member ship</string>
     <string name="menu_key">Key</string>
+    <string name="tv_content">You are welcome to give us a call or send us an email with your rental detail.
+    No tricks or dark magic , we have some really lovely 100% human in our stables ready to answer your request. Give us a call
+    or werite to us , then we will do our very best to get you back on the streeets again.
+    \n Email: sayakilstudio@gmail.com</string>
 </resources>

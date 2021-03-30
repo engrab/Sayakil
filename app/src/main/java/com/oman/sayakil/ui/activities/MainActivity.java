@@ -16,13 +16,11 @@ import com.oman.sayakil.databinding.ActivityMainBinding;
 import com.oman.sayakil.ui.bottom_fragments.CycleFragment;
 import com.oman.sayakil.ui.bottom_fragments.MapsFragment;
 import com.oman.sayakil.ui.bottom_fragments.KeyFragment;
-import com.oman.sayakil.ui.drawer_fragments.BillingStatementsFragment;
 import com.oman.sayakil.ui.drawer_fragments.MessageFragment;
 import com.oman.sayakil.ui.drawer_fragments.PaymentInformationFragment;
 import com.oman.sayakil.ui.drawer_fragments.RentTimerFragment;
 import com.oman.sayakil.ui.drawer_fragments.SettingsFragmentPref;
-import com.oman.sayakil.ui.drawer_fragments.StatisticsFragment;
-import com.oman.sayakil.ui.drawer_fragments.TripsFragment;
+import com.oman.sayakil.ui.drawer_fragments.ContactUsFragment;
 import com.oman.sayakil.ui.fragments.MemberShipFragment;
 
 import androidx.annotation.NonNull;
@@ -107,22 +105,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .commit();
                 break;
 
-            case R.id.nav_trips:
+//            case R.id.nav_trips:
+//
+//                getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.nav_host_fragment, new TripsFragment())
+//                        .commit();
+//                break;
+//
+//            case R.id.nav_billing:
+//                getSupportFragmentManager().beginTransaction()
+//                        .replace(R.id.nav_host_fragment, new BillingStatementsFragment())
+//                        .commit();
 
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new TripsFragment())
-                        .commit();
-                break;
-
-            case R.id.nav_billing:
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new BillingStatementsFragment())
-                        .commit();
-
-                break;
+//                break;
             case R.id.nav_statistics:
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new StatisticsFragment())
+                        .replace(R.id.nav_host_fragment, new ContactUsFragment())
                         .commit();
 
                 break;
