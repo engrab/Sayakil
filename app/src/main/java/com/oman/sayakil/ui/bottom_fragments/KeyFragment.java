@@ -20,12 +20,20 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Source;
 import com.oman.sayakil.databinding.FragmentKeyBinding;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+
 public class KeyFragment extends Fragment {
 
     private static final String TAG = "KeyFragment";
     private FragmentKeyBinding binding;
     private DocumentReference document;
-    private static final String KEY_TRANSCATION_ID="t_id";
+    private static final String KEY_TRANSCATION_ID = "t_id";
+    private static final String KEY_START_TIME = "s_time";
+    private static final String KEY_END_TIME = "end_time";
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -35,7 +43,66 @@ public class KeyFragment extends Fragment {
         createAccountOnFireStore();
         getDataFromFireStore();
 
+        binding.btnCheckout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                checkOut();
+            }
+        });
+
         return view;
+    }
+
+    private void checkOut() {
+        document.get(Source.SERVER).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    startEndTime();
+                }
+
+            }
+        });
+    }
+
+    private void startEndTime() {
+        HashMap<String, Date> map = new HashMap<>();
+        map.put(KEY_START_TIME, Calendar.getInstance().getTime());
+        map.put(KEY_END_TIME, nextHourTime());
+        document.set(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(getContext(), "Start Rent cycle", Toast.LENGTH_SHORT).show();
+                    binding.btnCheckout.setVisibility(View.GONE);
+                    getStartEndTime();
+                }
+            }
+        });
+    }
+
+    private void getStartEndTime() {
+        document.get(Source.SERVER).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    binding.tvKey.setText(String.valueOf(task.getResult().get(KEY_START_TIME)) + "\n" + String.valueOf(task.getResult().get(KEY_END_TIME)));
+                }
+            }
+        });
+    }
+
+    private Date nextHourTime() {
+
+        Date date = null;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.HOUR, 1);
+        return calendar.getTime();
+
     }
 
     @Override
@@ -43,16 +110,22 @@ public class KeyFragment extends Fragment {
         super.onDestroy();
         binding = null;
     }
-    private void getDataFromFireStore(){
+
+    private void getDataFromFireStore() {
         document.get(Source.DEFAULT).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
-                if (task.isSuccessful()){
+                if (task.isSuccessful()) {
                     DocumentSnapshot result = task.getResult();
-                    if (result.exists()){
+                    if (result.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + result.getData());
                         binding.tvKey.setText(String.valueOf(result.get(KEY_TRANSCATION_ID)));
+                        if (!String.valueOf(result.get(KEY_TRANSCATION_ID)).equals("null")) {
+                            binding.btnCheckout.setVisibility(View.VISIBLE);
+                        } else {
+                            binding.btnCheckout.setVisibility(View.INVISIBLE);
+                        }
 
 
                     }
