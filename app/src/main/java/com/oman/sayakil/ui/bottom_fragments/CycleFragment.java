@@ -155,7 +155,7 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
 
     private void saveDataOnFirstore(String transation) {
 
-        HashMap<String, Object> data = new HashMap<>();
+        HashMap<String, String> data = new HashMap<>();
 
         data.put(KEY_TRANSCATION_ID, transation);
 

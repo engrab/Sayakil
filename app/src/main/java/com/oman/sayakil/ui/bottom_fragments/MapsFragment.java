@@ -22,7 +22,6 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -35,11 +34,12 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.FragmentMapsBinding;
 import com.google.android.gms.common.ConnectionResult;
@@ -50,8 +50,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.oman.sayakil.model.LocationModel;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -63,21 +65,30 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = "MapsFragment";
     private FragmentMapsBinding binding;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private List<LocationModel> mList;
 
-    public static final int DEFAULT_ZOOM = 18;
-    private final double ISLAMABAD_LAT = 33.690904;
-    private final double ISLAMABAD_LNG = 73.051865;
+    public static final int DEFAULT_ZOOM = 10;
+    private final double OMAN_LAT = 19.966245355307795;
+    private final double OMAN_LNG = 56.28402662723767;
 
     public static final int PERMISSION_REQUEST_CODE = 9001;
     private static final int PLAY_SERVICES_ERROR_CODE = 9002;
     public static final int GPS_REQUEST_CODE = 9003;
 
-    private boolean mLocationPermissionGranted;
+
 
 
     private GoogleMap mGoogleMap;
     private FusedLocationProviderClient mLocationClient;
     private LocationCallback mLocationCallback;
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getListItems();
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -93,7 +104,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 
         binding.btnLocate.setOnClickListener(this::geoLocate);
         initGoogleMap();
-//        getCurrentLocation();
         mLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
         mLocationCallback = new LocationCallback() {
             @Override
@@ -161,6 +171,43 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         return view;
     }
 
+
+    private void getListItems() {
+        mList = new ArrayList<>();
+        db.collection("store").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots.isEmpty()) {
+                            Log.d(TAG, "onSuccess: LIST EMPTY");
+                            return;
+                        } else {
+                            // Convert the whole Query Snapshot to a list
+                            // of objects directly! No need to fetch each
+                            // document.
+                            List<LocationModel> types = queryDocumentSnapshots.toObjects(LocationModel.class);
+
+                            // Add all to your list
+                            mList.addAll(types);
+
+                            for (int i =0; i<mList.size(); i++){
+                                double lat = Double.parseDouble(mList.get(i).getLat());
+                                double lng = Double.parseDouble(mList.get(i).getLng());
+                                showMarker(lat, lng);
+                            }
+                            Log.d(TAG, "onSuccess: " + mList);
+
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getContext(), "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -181,6 +228,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onResume() {
         super.onResume();
+
     }
 
     private void geoLocate(View view) {
@@ -200,7 +248,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 
                 showMarker(address.getLatitude(), address.getLongitude());
 
-                Toast.makeText(getContext(), address.getLocality(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), address.getLocality(), Toast.LENGTH_SHORT).show();
 
                 Log.d(TAG, "geoLocate: Locality: " + address.getLocality());
             }
@@ -254,7 +302,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         Log.d(TAG, "onMapReady: map is showing on the screen");
 
         mGoogleMap = googleMap;
-        gotoLocation(ISLAMABAD_LAT, ISLAMABAD_LNG);
+        gotoLocation(OMAN_LAT, OMAN_LNG);
 //        mGoogleMap.setMyLocationEnabled(true);
 
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
@@ -390,7 +438,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            mLocationPermissionGranted = true;
+
             Toast.makeText(getContext(), "Permission granted", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getContext(), "Permission not granted", Toast.LENGTH_SHORT).show();

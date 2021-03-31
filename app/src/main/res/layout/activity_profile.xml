@@ -176,14 +176,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="Conformation email"
+                android:text="Confirmation email"
                 android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/et_conform_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter Conform Email"
+                android:hint="Enter Confirm Email"
                 android:inputType="textEmailAddress" />
 
 

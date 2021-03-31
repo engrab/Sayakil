@@ -1,6 +1,7 @@
 package com.oman.sayakil.ui.bottom_fragments;
 
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,14 +18,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 import com.oman.sayakil.databinding.FragmentKeyBinding;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class KeyFragment extends Fragment {
 
@@ -34,6 +36,7 @@ public class KeyFragment extends Fragment {
     private static final String KEY_TRANSCATION_ID = "t_id";
     private static final String KEY_START_TIME = "s_time";
     private static final String KEY_END_TIME = "end_time";
+    private static final String KEY_RETURN_TIME = "return_time";
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,8 +49,29 @@ public class KeyFragment extends Fragment {
         binding.btnCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setStartEndTime();
+//                checkOut();
+            }
+        });
+        binding.btnReturn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HashMap<String, Object> data = new HashMap<>();
 
-                checkOut();
+                data.put(KEY_TRANSCATION_ID, "null");
+
+
+                document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getContext(), "successfully return cycle", Toast.LENGTH_SHORT).show();
+                            binding.btnReturn.setVisibility(View.INVISIBLE);
+                            binding.btnCheckout.setVisibility(View.INVISIBLE);
+                            setReturnTime();
+                        }
+                    }
+                });
             }
         });
 
@@ -60,18 +84,18 @@ public class KeyFragment extends Fragment {
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
                 if (task.isSuccessful()) {
-                    startEndTime();
+                    setStartEndTime();
                 }
 
             }
         });
     }
 
-    private void startEndTime() {
-        HashMap<String, Date> map = new HashMap<>();
-        map.put(KEY_START_TIME, Calendar.getInstance().getTime());
-        map.put(KEY_END_TIME, nextHourTime());
-        document.set(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+    private void setStartEndTime() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put(KEY_START_TIME, formateDate(Calendar.getInstance().getTime()));
+        map.put(KEY_END_TIME, formateDate(nextHourTime()));
+        document.set(map, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -83,20 +107,72 @@ public class KeyFragment extends Fragment {
         });
     }
 
-    private void getStartEndTime() {
-        document.get(Source.SERVER).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+    private void setReturnTime() {
+        HashMap<String, String> map = new HashMap<>();
+        map.put(KEY_RETURN_TIME, formateDate(Calendar.getInstance().getTime()));
+
+        document.set(map, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    binding.tvKey.setText(String.valueOf(task.getResult().get(KEY_START_TIME)) + "\n" + String.valueOf(task.getResult().get(KEY_END_TIME)));
+                    Toast.makeText(getContext(), "Start Rent cycle", Toast.LENGTH_SHORT).show();
+                    binding.btnCheckout.setVisibility(View.GONE);
+                    getReturnTime();
+
                 }
             }
         });
     }
 
+    private void getReturnTime() {
+        document.get(Source.SERVER).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                if (task.isSuccessful()) {
+
+                    binding.tvKey.setText("Return Time : \n" + String.valueOf(task.getResult().get(KEY_RETURN_TIME))
+                            + "\n Start Time: \n" + task.getResult().get(KEY_START_TIME)
+                            + "\n End Time: \n" + task.getResult().get(KEY_END_TIME));
+                    binding.btnReturn.setVisibility(View.INVISIBLE);
+                    binding.btnCheckout.setVisibility(View.INVISIBLE);
+
+                }
+            }
+        });
+    }
+
+    private void getStartEndTime() {
+        document.get(Source.SERVER).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    String startTime = String.valueOf(task.getResult().get(KEY_START_TIME));
+                    String endTime = String.valueOf(task.getResult().get(KEY_END_TIME));
+                    if (startTime.equals("null") && endTime.equals("null")) {
+                        setStartEndTime();
+                    } else {
+                        binding.tvKey.setText("Star Time: \n "+String.valueOf(task.getResult().get(KEY_START_TIME))
+                                + "\n End Time: \n" + String.valueOf(task.getResult().get(KEY_END_TIME)));
+                        binding.btnReturn.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+        });
+    }
+
+
+    private String formateDate(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyy.MMMM.dd GGG hh:mm aaa");
+
+        String dateString = formatter.format(date);
+        return dateString;
+    }
+
     private Date nextHourTime() {
 
-        Date date = null;
+        Date date = new Date();
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
@@ -112,7 +188,7 @@ public class KeyFragment extends Fragment {
     }
 
     private void getDataFromFireStore() {
-        document.get(Source.DEFAULT).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        document.get(Source.SERVER).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
 
