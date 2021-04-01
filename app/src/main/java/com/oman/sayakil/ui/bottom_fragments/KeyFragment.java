@@ -59,6 +59,9 @@ public class KeyFragment extends Fragment {
                 HashMap<String, Object> data = new HashMap<>();
 
                 data.put(KEY_TRANSCATION_ID, "null");
+                data.put(KEY_END_TIME, "null");
+                data.put(KEY_RETURN_TIME, "null");
+                data.put(KEY_START_TIME, "null");
 
 
                 document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -194,13 +197,29 @@ public class KeyFragment extends Fragment {
 
                 if (task.isSuccessful()) {
                     DocumentSnapshot result = task.getResult();
+
                     if (result.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + result.getData());
-                        binding.tvKey.setText(String.valueOf(result.get(KEY_TRANSCATION_ID)));
+
+
                         if (!String.valueOf(result.get(KEY_TRANSCATION_ID)).equals("null")) {
-                            binding.btnCheckout.setVisibility(View.VISIBLE);
+
+                            if (!String.valueOf(result.get(KEY_START_TIME)).equals("null")){
+
+                                if (!String.valueOf(result.get(KEY_RETURN_TIME)).equals("null")){
+
+                                }
+
+                                binding.tvKey.setText(" Start Time: \n" + task.getResult().get(KEY_START_TIME)
+                                        + "\n End Time: \n" + task.getResult().get(KEY_END_TIME));                                binding.btnCheckout.setVisibility(View.INVISIBLE);
+                                binding.btnReturn.setVisibility(View.VISIBLE);
+                            }else {
+
+                                binding.btnCheckout.setVisibility(View.VISIBLE);
+                            }
+
                         } else {
                             binding.btnCheckout.setVisibility(View.INVISIBLE);
+                            binding.btnReturn.setVisibility(View.INVISIBLE);
                         }
 
 
