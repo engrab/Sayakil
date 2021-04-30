@@ -187,7 +187,7 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
 
         try {
             jsonObject.put("name", "Sayakil Studio");
-            jsonObject.put("description", title);
+            jsonObject.put("description", title+" Bike Rent");
             jsonObject.put("theme.color", "#0093DD");
             jsonObject.put("currency", "USD");
             jsonObject.put("amount", money);
