@@ -29,4 +29,6 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="colorGray">#D0D0D0</color>
+
+    <color name="red_400">#EF5350</color>
 </resources>

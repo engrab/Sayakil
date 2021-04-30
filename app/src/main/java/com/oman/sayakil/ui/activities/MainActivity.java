@@ -105,12 +105,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .commit();
                 break;
 
-//            case R.id.nav_trips:
-//
-//                getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.nav_host_fragment, new TripsFragment())
-//                        .commit();
-//                break;
+            case R.id.nav_rent:
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.nav_host_fragment, new CycleFragment())
+                        .commit();
+                binding.mainContent.bottomNavView.setSelectedItemId(R.id.bottom_nav_view);
+
+                MenuItem item1 = binding.mainContent.bottomNavView.getMenu().findItem(R.id.nav_bottom_cycle);
+                item1.setChecked(true);
+                break;
 //
 //            case R.id.nav_billing:
 //                getSupportFragmentManager().beginTransaction()

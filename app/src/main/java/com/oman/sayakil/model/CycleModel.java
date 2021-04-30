@@ -4,11 +4,14 @@ public class CycleModel {
     private String title;
     private int price;
     private String image;
+    private String desc;
 
-    public CycleModel(String title, int price, String image) {
-        this.title = title;
-        this.price = price;
-        this.image = image;
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public String getImage() {

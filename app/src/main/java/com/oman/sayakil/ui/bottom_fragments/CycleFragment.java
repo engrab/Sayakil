@@ -1,16 +1,22 @@
 package com.oman.sayakil.ui.bottom_fragments;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,6 +45,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class CycleFragment extends Fragment implements PaymentResultListener {
 
@@ -170,7 +178,7 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         });
     }
 
-    private void razorPay(int money){
+    private void razorPay(int money, String title){
         Checkout checkout = new Checkout();
         checkout.setKeyID("rzp_test_6lbQOCxNc8Or5W");
         checkout.setImage(R.mipmap.ic_launcher);
@@ -179,11 +187,11 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
 
         try {
             jsonObject.put("name", "Sayakil Studio");
-            jsonObject.put("description", "Test Payment");
+            jsonObject.put("description", title);
             jsonObject.put("theme.color", "#0093DD");
             jsonObject.put("currency", "USD");
             jsonObject.put("amount", money);
-            jsonObject.put("prefill.contact", "03477141224");
+            jsonObject.put("prefill.contact", "+968 9632 2522");
             jsonObject.put("prefill.email", "sayakilstudio@gmail.com");
             checkout.open(getActivity(), jsonObject);
         } catch (JSONException e) {
@@ -235,12 +243,18 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
 
             holder.bindingCycle.tvTitle.setText(cycleList.get(position).getTitle());
             holder.bindingCycle.tvPrice.setText(String.valueOf(cycleList.get(position).getPrice()));
+            cycleList.get(position).getImage();
             Picasso.get().load(cycleList.get(position).getImage()).into(holder.bindingCycle.ivImage);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    String title = cycleList.get(position).getTitle();
+                    int price = cycleList.get(position).getPrice();
+                    String image = cycleList.get(position).getImage();
+                    String desc = cycleList.get(position).getDesc();
+                    showCustomDialog(title, desc, price, image);
                     amount = Math.round(Float.parseFloat(String.valueOf(cycleList.get(position).getPrice()))*amount);
-                    razorPay(amount);
+
                 }
             });
 
@@ -260,6 +274,40 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
             }
 
         }
+    }
+
+    private void showCustomDialog(String title, String desc, int price, String url) {
+        final Dialog dialog = new Dialog(getContext());
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // before
+        dialog.setContentView(R.layout.dialog_cycle_info);
+        dialog.setCancelable(true);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        ImageView image = dialog.findViewById(R.id.icon);
+        TextView tvTitle = dialog.findViewById(R.id.title);
+        TextView tvPrice = dialog.findViewById(R.id.price);
+        TextView tvDesc = dialog.findViewById(R.id.content);
+
+        Picasso.get().load(url).into(image);
+        tvPrice.setText(String.valueOf(price));
+        tvTitle.setText(title);
+        tvDesc.setText(desc);
+
+
+
+        dialog.findViewById(R.id.btn_pay).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                razorPay(amount, title);
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setAttributes(lp);
     }
 
 }
