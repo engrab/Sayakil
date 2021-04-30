@@ -26,10 +26,10 @@
             android:id="@+id/nav_rent"
             android:icon="@drawable/ic_bike"
             android:title="Rent" />
-<!--        <item-->
-<!--            android:id="@+id/nav_billing"-->
-<!--            android:icon="@drawable/ic_billing_statement"-->
-<!--            android:title="@string/menu_billing" />-->
+        <item
+            android:id="@+id/nav_feedback"
+            android:icon="@drawable/ic_feedback"
+            android:title="Feedback" />
         <item
             android:id="@+id/nav_statistics"
             android:icon="@drawable/ic_baseline_stacked_line_chart_24"

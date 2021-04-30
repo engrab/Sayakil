@@ -115,13 +115,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MenuItem item1 = binding.mainContent.bottomNavView.getMenu().findItem(R.id.nav_bottom_cycle);
                 item1.setChecked(true);
                 break;
-//
-//            case R.id.nav_billing:
-//                getSupportFragmentManager().beginTransaction()
-//                        .replace(R.id.nav_host_fragment, new BillingStatementsFragment())
-//                        .commit();
 
-//                break;
+            case R.id.nav_feedback:
+                startActivity(new Intent(MainActivity.this, FeedBackActivity.class));
+
+                break;
             case R.id.nav_statistics:
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new ContactUsFragment())

@@ -34,7 +34,6 @@
     </plurals>
 
 
-
     <string name="birthday">Date of birth</string>
     <string name="birthday_optional">Date of birth (optional)</string>
     <string name="bottom_sheet_behavior">android.support.design.widget.BottomSheetBehavior</string>
@@ -96,4 +95,6 @@
     No tricks or dark magic , we have some really lovely 100% human in our stables ready to answer your request. Give us a call
     or werite to us , then we will do our very best to get you back on the streeets again.
     \n Email: sayakilstudio@gmail.com</string>
+    <string name="app_version">1.0</string>
+    <string name="version_unknown">30</string>
 </resources>
