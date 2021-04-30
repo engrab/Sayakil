@@ -114,7 +114,19 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId()==R.id.menu_save){
-            saveDataOnFirstore();
+            if (binding.etFirstName.getText().toString().trim().isEmpty() &&
+            binding.etLastName.getText().toString().trim().isEmpty() &&
+            binding.etDateBirth.getText().toString().trim().isEmpty() &&
+            binding.etPhoneNumber.getText().toString().trim().isEmpty() &&
+            binding.etEmail.getText().toString().trim().isEmpty() &&
+            binding.etLine1.getText().toString().trim().isEmpty() &&
+            binding.etZip.getText().toString().trim().isEmpty()){
+                Toast.makeText(ProfileActivity.this, "Please Insert All Information",Toast.LENGTH_LONG).show();
+
+            }else {
+
+                saveDataOnFirstore();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -205,35 +217,4 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
-
-//    private void setPref() {
-//        SharedPreferencesManager.getInstance(this).setFirstName(binding.etFirstName.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setLastName(binding.etLastName.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setDateBirth(binding.etDateBirth.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setPhoneNumber(binding.etPhoneNumber.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setSecondPhoneNumber(binding.etSecondPhoneNumber.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setEmail(binding.etEmail.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setConformEmail(binding.etConformEmail.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setL1(binding.etLine1.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setL2(binding.etLine2.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setZipcode(binding.etZip.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setProvincce(binding.etProvince.getText().toString());
-//        SharedPreferencesManager.getInstance(this).setGender(binding.spGender.getSelectedItemPosition());
-//
-//    }
-
-//    private void getPref() {
-//        binding.etFirstName.setText(SharedPreferencesManager.getInstance(this).getFirstName());
-//        binding.etLastName.setText(SharedPreferencesManager.getInstance(this).getLastName());
-//        binding.etDateBirth.setText(SharedPreferencesManager.getInstance(this).getDateBirth());
-//        binding.etPhoneNumber.setText(SharedPreferencesManager.getInstance(this).getPhoneNumber());
-//        binding.etSecondPhoneNumber.setText(SharedPreferencesManager.getInstance(this).getSecondPhoneNumber());
-//        binding.etEmail.setText(SharedPreferencesManager.getInstance(this).getEmail());
-//        binding.etConformEmail.setText(SharedPreferencesManager.getInstance(this).getConformEmail());
-//        binding.etLine1.setText(SharedPreferencesManager.getInstance(this).getL1());
-//        binding.etLine2.setText(SharedPreferencesManager.getInstance(this).getL2());
-//        binding.etZip.setText(SharedPreferencesManager.getInstance(this).getZipcode());
-//        binding.etProvince.setText(SharedPreferencesManager.getInstance(this).getProvince());
-////        binding.spGender.setSelection(SharedPreferencesManager.getInstance(this).getGender());
-//        }
 }
