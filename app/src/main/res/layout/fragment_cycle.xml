@@ -3,20 +3,27 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".ui.bottom_fragments.CycleFragment">
+
+
 
     <TextView
         android:id="@+id/tv_nointernet"
-        android:visibility="gone"
-        android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Please Connect Internet Connection" />
+        android:gravity="center"
+        android:text="Please Connect Internet Connection"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_cycle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/cycle_fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </LinearLayout>

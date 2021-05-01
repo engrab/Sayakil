@@ -2,6 +2,7 @@ package com.oman.sayakil.ui.bottom_fragments;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,9 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -35,6 +34,7 @@ import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.FragmentCycleBinding;
 import com.oman.sayakil.databinding.ItemCycleBinding;
 import com.oman.sayakil.model.CycleModel;
+import com.oman.sayakil.ui.activities.PaymentCardDetailsActivity;
 import com.razorpay.Checkout;
 import com.razorpay.PaymentResultListener;
 import com.squareup.picasso.Picasso;
@@ -45,8 +45,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class CycleFragment extends Fragment implements PaymentResultListener {
 
@@ -158,27 +156,6 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         });
     }
 
-    private void razorPay(int money, String title){
-        Checkout checkout = new Checkout();
-        checkout.setKeyID("rzp_test_6lbQOCxNc8Or5W");
-        checkout.setImage(R.mipmap.ic_launcher);
-
-        JSONObject jsonObject = new JSONObject();
-
-        try {
-            jsonObject.put("name", "Sayakil Studio");
-            jsonObject.put("description", title+" Bike Rent");
-            jsonObject.put("theme.color", "#0093DD");
-            jsonObject.put("currency", "USD");
-            jsonObject.put("amount", money);
-            jsonObject.put("prefill.contact", "+968 9632 2522");
-            jsonObject.put("prefill.email", "sayakilstudio@gmail.com");
-            checkout.open(getActivity(), jsonObject);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     @Override
     public void onDestroy() {
@@ -282,12 +259,19 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         dialog.findViewById(R.id.btn_pay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                razorPay(amount, title);
+                showPaymentCardDetail();
+
+                dialog.dismiss();
             }
         });
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
+    }
+
+    private void showPaymentCardDetail() {
+
+        getActivity().startActivity(new Intent(getActivity().getApplicationContext(), PaymentCardDetailsActivity.class));
     }
 
 }

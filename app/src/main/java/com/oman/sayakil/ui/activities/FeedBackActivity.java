@@ -67,6 +67,12 @@ public class FeedBackActivity extends AppCompatActivity {
         getListItems();
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
     public void initToolbar() {
 
         toolbar = findViewById(R.id.toolbar);
@@ -126,7 +132,6 @@ public class FeedBackActivity extends AppCompatActivity {
     }
 
 
-
     private void getListItems() {
         document.collection("message").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
@@ -167,6 +172,7 @@ public class FeedBackActivity extends AppCompatActivity {
             btn_send.setEnabled(false);
         }
     }
+
     private void insertItems(String message, boolean isFromMe, String date) {
         // Create a new user with a first and last name
         Map<String, Object> user = new HashMap<>();
@@ -175,14 +181,14 @@ public class FeedBackActivity extends AppCompatActivity {
         user.put("date", date);
 
         // Add a new document with a generated ID
-        document.collection("message").document(mList.size()+"").set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+        document.collection("message").document(mList.size() + "").set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-           
-                if (task.isSuccessful()){
+
+                if (task.isSuccessful()) {
                     Toast.makeText(FeedBackActivity.this, "Send", Toast.LENGTH_SHORT).show();
                 }
-                
+
             }
         });
     }
