@@ -20,7 +20,7 @@ public class AdapterChatBBM extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private final int CHAT_ME = 100;
     private final int CHAT_YOU = 200;
 
-    private List<Message> items = new ArrayList<>();
+    private List<Message> items;
 
     private Context ctx;
     private OnItemClickListener mOnItemClickListener;
@@ -34,8 +34,9 @@ public class AdapterChatBBM extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public AdapterChatBBM(Context context) {
+    public AdapterChatBBM(Context context, List<Message> messageList) {
         ctx = context;
+        items = messageList;
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {

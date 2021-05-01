@@ -33,6 +33,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 import com.oman.sayakil.R;
 import com.oman.sayakil.adapter.AdapterChatBBM;
@@ -52,7 +53,6 @@ public class FeedBackActivity extends AppCompatActivity {
     private AdapterChatBBM adapter;
     private RecyclerView recycler_view;
     private DocumentReference document;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<Message> mList = new ArrayList<>();
     private ActionBar actionBar;
     Toolbar toolbar;
@@ -85,9 +85,8 @@ public class FeedBackActivity extends AppCompatActivity {
         recycler_view.setLayoutManager(layoutManager);
         recycler_view.setHasFixedSize(true);
 
-        adapter = new AdapterChatBBM(this);
+        adapter = new AdapterChatBBM(this, mList);
         recycler_view.setAdapter(adapter);
-        adapter.insertItem(new Message( "Hello!", true, Tools.getFormattedTimeEvent(System.currentTimeMillis())));
 
         btn_send = findViewById(R.id.btn_send);
         et_content = findViewById(R.id.text_content);
@@ -114,11 +113,11 @@ public class FeedBackActivity extends AppCompatActivity {
         }
         if (email != null && !email.isEmpty()) {
 
-            document = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid());
+            document = FirebaseFirestore.getInstance().collection("feedback").document(currentUser.getUid());
         } else {
             if (phoneNumber != null) {
 
-                document = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid());
+                document = FirebaseFirestore.getInstance().collection("feedback").document(currentUser.getUid());
             } else {
                 Toast.makeText(this, "Please Authenticate your self", Toast.LENGTH_SHORT).show();
             }
@@ -126,33 +125,10 @@ public class FeedBackActivity extends AppCompatActivity {
         }
     }
 
-    private void insertItems() {
-        // Create a new user with a first and last name
-        Map<String, Object> user = new HashMap<>();
-        Message message = new Message();
-        user.put("first", message.getContent());
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
 
-        // Add a new document with a generated ID
-        db.collection("feedback")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
-    }
 
     private void getListItems() {
-        db.collection("feedback").get()
+        document.collection("message").get()
                 .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -183,18 +159,32 @@ public class FeedBackActivity extends AppCompatActivity {
     private void sendChat() {
         final String msg = et_content.getText().toString();
         adapter.insertItem(new Message(msg, true, Tools.getFormattedTimeEvent(System.currentTimeMillis())));
+        insertItems(msg, true, Tools.getFormattedTimeEvent(System.currentTimeMillis()));
         et_content.setText("");
         recycler_view.scrollToPosition(adapter.getItemCount() - 1);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                adapter.insertItem(new Message(msg, false, Tools.getFormattedTimeEvent(System.currentTimeMillis())));
-                recycler_view.scrollToPosition(adapter.getItemCount() - 1);
-            }
-        }, 1000);
+
         if (et_content.length() == 0) {
             btn_send.setEnabled(false);
         }
+    }
+    private void insertItems(String message, boolean isFromMe, String date) {
+        // Create a new user with a first and last name
+        Map<String, Object> user = new HashMap<>();
+        user.put("content", message);
+        user.put("fromMe", isFromMe);
+        user.put("date", date);
+
+        // Add a new document with a generated ID
+        document.collection("message").document(mList.size()+"").set(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+           
+                if (task.isSuccessful()){
+                    Toast.makeText(FeedBackActivity.this, "Send", Toast.LENGTH_SHORT).show();
+                }
+                
+            }
+        });
     }
 
     @Override
