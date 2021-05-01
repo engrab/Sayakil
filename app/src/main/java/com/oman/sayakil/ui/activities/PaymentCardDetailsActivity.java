@@ -2,6 +2,7 @@ package com.oman.sayakil.ui.activities;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
@@ -14,10 +15,19 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.oman.sayakil.R;
 import com.oman.sayakil.utils.Tools;
 import com.razorpay.PaymentResultListener;
+
+import java.util.HashMap;
 
 
 public class PaymentCardDetailsActivity extends AppCompatActivity {
@@ -33,16 +43,18 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
     private TextInputEditText et_name;
 
     private Button pay;
-
-
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private DocumentReference document;
+    int price;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_card_details);
+        createAccountOnFireStore();
 
-        int price = getIntent().getIntExtra("price_key",10);
+        price = getIntent().getIntExtra("price_key",10);
 
         tvPrice = findViewById(R.id.tv_price);
         tvPrice.setText(""+price+" OMR");
@@ -154,6 +166,7 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
 
                 if (cardnumber.length()==16 && cvv.length()==3 && expire.length()==4 && !name.isEmpty()){
                     Toast.makeText(PaymentCardDetailsActivity.this, "pay successfully", Toast.LENGTH_SHORT).show();
+                    saveDataOnFirstore(cardnumber, cvv, expire, name, price);
                 }else {
                     Toast.makeText(PaymentCardDetailsActivity.this, "fill all field", Toast.LENGTH_SHORT).show();
 
@@ -162,5 +175,51 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void createAccountOnFireStore() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String email = null;
+        String phoneNumber = null;
+
+
+        if (currentUser != null) {
+            email = currentUser.getEmail();
+            phoneNumber = currentUser.getPhoneNumber();
+        }
+        if (email != null && !email.isEmpty()) {
+
+            document = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid()).collection("carddetail").document();
+        } else {
+            if (phoneNumber != null) {
+
+                document = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid()).collection("carddetail").document();
+            } else {
+                Toast.makeText(this, "Please Authenticate your self", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+    }
+
+    private void saveDataOnFirstore(String cardnumber, String cvv, String expire, String name, int rent) {
+
+        HashMap<String, Object> data = new HashMap<>();
+
+        data.put("cardnumber", cardnumber);
+        data.put("cardname", name);
+        data.put("cvv", cvv);
+        data.put("expire", expire);
+        data.put("price", rent);
+
+
+        document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(PaymentCardDetailsActivity.this, "successfully", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
 }
