@@ -25,6 +25,7 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
     private TextView card_expire;
     private TextView card_cvv;
     private TextView card_name;
+    private TextView tvPrice;
 
     private TextInputEditText et_card_number;
     private TextInputEditText et_expire;
@@ -40,6 +41,11 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_card_details);
+
+        int price = getIntent().getIntExtra("price_key",10);
+
+        tvPrice = findViewById(R.id.tv_price);
+        tvPrice.setText(""+price+" OMR");
         card_number = findViewById(R.id.card_number);
         card_expire = findViewById(R.id.card_expire);
         card_cvv = findViewById(R.id.card_cvv);

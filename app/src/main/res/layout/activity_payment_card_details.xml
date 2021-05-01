@@ -266,6 +266,14 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tv_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="monospace"
+        android:layout_gravity="center"
+        android:text="12"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline" />
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"

@@ -259,7 +259,7 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         dialog.findViewById(R.id.btn_pay).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showPaymentCardDetail();
+                showPaymentCardDetail(price);
 
                 dialog.dismiss();
             }
@@ -269,9 +269,11 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         dialog.getWindow().setAttributes(lp);
     }
 
-    private void showPaymentCardDetail() {
+    private void showPaymentCardDetail(int price) {
 
-        getActivity().startActivity(new Intent(getActivity().getApplicationContext(), PaymentCardDetailsActivity.class));
+        Intent intent = new Intent(getActivity().getApplicationContext(), PaymentCardDetailsActivity.class);
+        intent.putExtra("price_key", price);
+        getActivity().startActivity(intent);
     }
 
 }
