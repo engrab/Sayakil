@@ -71,9 +71,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
-public class MapsFragment extends Fragment implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class MapsFragment extends Fragment {
     private static final String TAG = "MapsFragment";
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private List<StoreInfo> mList;
@@ -82,9 +80,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     private final double OMAN_LAT = 19.966245355307795;
     private final double OMAN_LNG = 56.28402662723767;
 
-    public static final int PERMISSION_REQUEST_CODE = 9001;
-    private static final int PLAY_SERVICES_ERROR_CODE = 9002;
-    public static final int GPS_REQUEST_CODE = 9003;
 
     private static GoogleMap mMap;
     private static BottomSheetBehavior bottomSheetBehavior;
@@ -92,9 +87,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     private RecyclerView recyclerView;
 
 
-    private GoogleMap mGoogleMap;
-    private FusedLocationProviderClient mLocationClient;
-    private LocationCallback mLocationCallback;
+    LinearLayout llBottomSheet;
+
 
 
 
@@ -104,42 +98,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_maps, container,false);
+        View view = inflater.inflate(R.layout.fragment_maps, container,false);
+        view.findViewById(R.id.fab_directions).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                try {
+                    mMap.animateCamera(zoomingLocation());
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("messages").child("location").child("latlng");
-        // Read from the database
+                } catch (Exception e) {
+                }
+            }
+        });
+        llBottomSheet = view.findViewById(R.id.bottom_sheet);
 
-
-//        initGoogleMap();
-//        mLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
-//        mLocationCallback = new LocationCallback() {
-//            @Override
-//            public void onLocationResult(LocationResult locationResult) {
-//
-//                if (locationResult == null) {
-//                    return;
-//                }
-//
-//                Location location = locationResult.getLastLocation();
-//
-//                myRef.push().setValue(location.getLatitude() + " : " + location.getLongitude());
-//                Toast.makeText(getContext(), location.getLatitude() + " \n" +
-//                        location.getLongitude(), Toast.LENGTH_SHORT).show();
-//
-//
-//                gotoLocation(location.getLatitude(), location.getLongitude());
-//                showMarker(location.getLatitude(), location.getLongitude());
-//
-//
-//                Log.d(TAG, "onLocationResult: " + location.getLatitude() + " \n" +
-//                        location.getLongitude());
-//
-//
-//            }
-//        };
         recyclerView = view.findViewById(R.id.rv_sheetmap);
         initList();
+
         initMapFragment();
         initComponent(view);
         startRecyclerView();
@@ -155,220 +130,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 //        SupportMapFragment mapFragment =
 //                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 //        if (mapFragment != null) {
+//            initMapFragment();
 //            mapFragment.getMapAsync(this);
 //        }
 //    }
 
 
 
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-
-
-    private void showMarker(double lat, double lng) {
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(new LatLng(lat, lng));
-        mGoogleMap.addMarker(markerOptions);
-    }
-
-
-
-    private void initGoogleMap() {
-
-        if (isServicesOk()) {
-            if (isGPSEnabled()) {
-                if (checkLocationPermission()) {
-                    Toast.makeText(getContext(), "Ready to Map", Toast.LENGTH_SHORT).show();
-
-                    SupportMapFragment supportMapFragment = (SupportMapFragment) getChildFragmentManager()
-                            .findFragmentById(R.id.map);
-
-                    if (supportMapFragment != null) {
-                        supportMapFragment.getMapAsync(this);
-                    }
-                } else {
-                    requestLocationPermission();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        Log.d(TAG, "onMapReady: map is showing on the screen");
-
-        mGoogleMap = googleMap;
-        gotoLocation(OMAN_LAT, OMAN_LNG);
-//        mGoogleMap.setMyLocationEnabled(true);
-
-        mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        mGoogleMap.getUiSettings().setMapToolbarEnabled(true);
-
-    }
-
-    private void gotoLocation(double lat, double lng) {
-
-        LatLng latLng = new LatLng(lat, lng);
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM);
-
-        mGoogleMap.moveCamera(cameraUpdate);
-//        mGoogleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-
-    }
-
-    private boolean isGPSEnabled() {
-
-        LocationManager locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-
-        boolean providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-        if (providerEnabled) {
-            return true;
-        } else {
-
-            androidx.appcompat.app.AlertDialog alertDialog = new AlertDialog.Builder(getContext())
-                    .setTitle("GPS Permissions")
-                    .setMessage("GPS is required for this app to work. Please enable GPS.")
-                    .setPositiveButton("Yes", ((dialogInterface, i) -> {
-                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivityForResult(intent, GPS_REQUEST_CODE);
-                    }))
-                    .setCancelable(false)
-                    .show();
-
-        }
-
-        return false;
-    }
-
-    private boolean checkLocationPermission() {
-
-        return ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private boolean isServicesOk() {
-
-        GoogleApiAvailability googleApi = GoogleApiAvailability.getInstance();
-
-        int result = googleApi.isGooglePlayServicesAvailable(getContext());
-
-        if (result == ConnectionResult.SUCCESS) {
-            return true;
-        } else if (googleApi.isUserResolvableError(result)) {
-            Dialog dialog = googleApi.getErrorDialog(this, result, PLAY_SERVICES_ERROR_CODE, task ->
-                    Toast.makeText(getContext(), "Dialog is cancelled by User", Toast.LENGTH_SHORT).show());
-            dialog.show();
-        } else {
-            Toast.makeText(getContext(), "Play services are required by this application", Toast.LENGTH_SHORT).show();
-        }
-        return false;
-    }
-
-    private void requestLocationPermission() {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
-            }
-        }
-    }
-
-
-
-    private void getLocationUpdates() {
-
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(1000);
-
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                Log.d(TAG, "run: done");
-
-                if (ActivityCompat.checkSelfPermission(
-                        getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "run: done");
-
-                    return;
-                }
-                mLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, Looper.getMainLooper());
-
-            }
-        }).start();
-
-
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            Toast.makeText(getContext(), "Permission granted", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getContext(), "Permission not granted", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == GPS_REQUEST_CODE) {
-
-            LocationManager locationManager = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-
-            boolean providerEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
-            if (providerEnabled) {
-                Toast.makeText(getContext(), "GPS is enabled", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), "GPS not enabled. Unable to show user location", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Toast.makeText(getContext(), "Connected to Location Services", Toast.LENGTH_SHORT).show();
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mLocationCallback != null) {
-            mLocationClient.removeLocationUpdates(mLocationCallback);
-        }
-    }
 
 
     private static class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
@@ -459,7 +227,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 
     private void initComponent(View view) {
         // get the bottom sheet view
-        LinearLayout llBottomSheet = view.findViewById(R.id.bottom_sheet);
+
 
         // init the bottom sheet behavior
         bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
@@ -480,17 +248,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
-        view.findViewById(R.id.fab_directions).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                try {
-                    mMap.animateCamera(zoomingLocation());
-                    getLocationUpdates();
-                } catch (Exception e) {
-                }
-            }
-        });
+
     }
 
     private void initMapFragment() {
@@ -498,7 +256,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                mMap = Tools.configActivityMaps(googleMap);
+                mMap = googleMap;
                 MarkerOptions markerOptions = new MarkerOptions().position(new LatLng(OMAN_LAT, OMAN_LNG));
                 mMap.addMarker(markerOptions);
                 mMap.moveCamera(zoomingLocation());
