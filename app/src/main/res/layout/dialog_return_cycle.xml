@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|start"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <EditText
+            android:id="@+id/type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:hint="Enter Bicycle Type"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textColor="#666" />
+
+        <EditText
+            android:id="@+id/user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:hint="User Name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textColor="#666" />
+
+        <EditText
+            android:id="@+id/area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:hint="Enter Area Name"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textColor="#666" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/lyt_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_cancle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:background="@drawable/btn_rounded_red"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text=" Cancle "
+            android:textColor="@android:color/white" />
+        <View
+            android:layout_width="20dp"
+            android:layout_height="0dp" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:background="@drawable/btn_rounded_red"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:text=" OK "
+            android:textColor="@android:color/white" />
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

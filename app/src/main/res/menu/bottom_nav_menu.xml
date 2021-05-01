@@ -6,12 +6,12 @@
     <item
         android:id="@+id/nav_bottom_my_location"
         android:icon="@drawable/ic_baseline_my_location_24"
-        android:title="@string/menu_my_location" />
+        android:title="My Location" />
 
     <item
         android:id="@+id/nav_bottom_key"
-        android:icon="@drawable/ic_key"
-        android:title="@string/menu_key" />
+        android:icon="@drawable/ic_return"
+        android:title="Return Cycle" />
 
     <item
         android:id="@+id/nav_bottom_cycle"
