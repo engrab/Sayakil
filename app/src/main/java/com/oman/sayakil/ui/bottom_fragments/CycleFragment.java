@@ -72,26 +72,6 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         startRecyclerView();
         createAccountOnFireStore();
 
-//        if (Utils.isNetworkAvailable(getContext())) {
-//            binding.tvNointernet.setVisibility(View.GONE);
-//            db.collection("data").document("cycle_info")
-//                    .get(Source.SERVER)
-//                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//                        @Override
-//                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-//
-//                            if (documentSnapshot.exists()) {
-//                                CycleModel cycleModel = documentSnapshot.toObject(CycleModel.class);
-//
-//                                mList.add(cycleModel);
-//                                startRecyclerView();
-//                            }
-//                        }
-//                    });
-//        } else {
-//            binding.tvNointernet.setVisibility(View.VISIBLE);
-//        }
-
 
         return view;
     }
