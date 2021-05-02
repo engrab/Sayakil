@@ -114,7 +114,6 @@ public class MapsFragment extends Fragment {
                         return;
                     }
                     mMap.setMyLocationEnabled(true);
-                    mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
                 } catch (Exception e) {
                 }

@@ -41,9 +41,13 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".ui.activities.FeedBackActivity" />
+        <activity android:name=".ui.activities.FeedBackActivity"
+            android:parentActivityName=".ui.activities.MainActivity"/>
         <activity android:name=".ui.activities.ProfileActivity" />
-        <activity android:name=".ui.activities.PaymentCardDetailsActivity" />
+        <activity android:name=".ui.activities.PaymentCardDetailsActivity"
+            android:parentActivityName=".ui.activities.MainActivity"/>
+        <activity android:name=".ui.activities.PaymentInformationActivity"
+            android:parentActivityName=".ui.activities.MainActivity"/>
         <activity android:name=".ui.activities.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

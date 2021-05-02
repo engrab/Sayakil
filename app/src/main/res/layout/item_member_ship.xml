@@ -28,17 +28,24 @@
                     android:id="@+id/tv_days"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:text="One Day Membership"
                     android:textSize="20sp" />
 
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".5"
+                    android:gravity="end"
+                    android:text="AED"
+                    android:textSize="20sp" />
                 <TextView
                     android:id="@+id/tv_price"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight=".5"
                     android:gravity="center"
-                    android:text="AED20"
+                    android:text="20"
                     android:textSize="20sp" />
 
             </LinearLayout>

@@ -67,11 +67,12 @@ public class FeedBackActivity extends AppCompatActivity {
         getListItems();
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
-    }
+    // for toolbar navigation / backpress.
+//    @Override
+//    public boolean onSupportNavigateUp() {
+//        onBackPressed();
+//        return true;
+//    }
 
     public void initToolbar() {
 

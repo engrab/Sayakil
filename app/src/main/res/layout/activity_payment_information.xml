@@ -17,7 +17,7 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:subtitleTextAppearance="@style/TextAppearance.AppCompat.Small"
         app:subtitleTextColor="#E6E6E6"
-        app:title="Card Detail"
+        app:title="Card Information"
         app:titleTextAppearance="@style/TextAppearance.AppCompat.Medium"
         app:titleTextColor="@android:color/white" />
 
@@ -280,14 +280,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="monospace"
-        android:layout_gravity="center"
-        android:text="12"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Headline" />
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -299,11 +291,11 @@
         android:padding="@dimen/spacing_large">
 
         <Button
-            android:id="@+id/btn_pay"
+            android:id="@+id/btn_save"
             android:layout_width="match_parent"
             android:layout_height="55dp"
             android:background="@drawable/btn_orange"
-            android:text="Pay"
+            android:text="Save"
             android:textAllCaps="false"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
             android:textColor="@android:color/white" />

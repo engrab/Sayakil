@@ -20,6 +20,7 @@ import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.FragmentMemberShipBinding;
 import com.oman.sayakil.databinding.ItemMemberShipBinding;
 import com.oman.sayakil.model.MemberModel;
+import com.oman.sayakil.ui.activities.PaymentCardDetailsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,10 +73,10 @@ public class MemberShipFragment extends Fragment {
     private void memberList() {
         mList = new ArrayList<>();
 
-        mList.add(new MemberModel("One Day Membership", "AED 20", getString(R.string.one_day_memeber_ship)));
-        mList.add(new MemberModel("Three Day Membership", "AED 50", getString(R.string.three_day_memeber_ship)));
-        mList.add(new MemberModel("Monthly Day Membership", "AED 99", getString(R.string.monthly_memeber_ship)));
-        mList.add(new MemberModel("Yearly Day Membership", "AED 500", getString(R.string.yearly_memeber_ship)));
+        mList.add(new MemberModel("One Day Membership", 20, getString(R.string.one_day_memeber_ship)));
+        mList.add(new MemberModel("Three Day Membership", 50, getString(R.string.three_day_memeber_ship)));
+        mList.add(new MemberModel("Monthly Day Membership", 99, getString(R.string.monthly_memeber_ship)));
+        mList.add(new MemberModel("Yearly Day Membership", 500, getString(R.string.yearly_memeber_ship)));
     }
 
     @Override
@@ -150,14 +151,16 @@ public class MemberShipFragment extends Fragment {
 
 
             holder.bindingItem.tvDays.setText(mList.get(position).getDays());
-            holder.bindingItem.tvPrice.setText(mList.get(position).getPrice());
+            holder.bindingItem.tvPrice.setText(String.valueOf(mList.get(position).getPrice()));
             holder.bindingItem.tvDesc.setText(mList.get(position).getDesc());
+
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    uri = getUpiPaymentUri(name, upiId, transactionNote, amount);
-                    payWithGPay();
+                    Intent intent = new Intent(getActivity().getApplicationContext(), PaymentCardDetailsActivity.class);
+                    intent.putExtra("price_key", mList.get(position).getPrice());
+                    getActivity().startActivity(intent);
                 }
             });
         }

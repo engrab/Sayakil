@@ -26,9 +26,9 @@
         tools:layout="@layout/fragment_member_ship" />
     <fragment
         android:id="@+id/paymentInformationFragment"
-        android:name="com.oman.sayakil.ui.drawer_fragments.PaymentInformationFragment"
+        android:name="com.oman.sayakil.ui.activities.PaymentInformationActivity"
         android:label="fragment_payment_information"
-        tools:layout="@layout/fragment_payment_information" />
+        tools:layout="@layout/activity_payment_information" />
     <activity
         android:id="@+id/profileActivity"
         android:name="com.oman.sayakil.ui.activities.ProfileActivity"

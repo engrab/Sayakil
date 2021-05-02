@@ -3,9 +3,9 @@ package com.oman.sayakil.model;
 public class MemberModel {
     private String days;
     private String desc;
-    private String price;
+    private int price;
 
-    public MemberModel(String days, String price,  String desc) {
+    public MemberModel(String days, int price,  String desc) {
         this.days = days;
         this.desc = desc;
         this.price = price;
@@ -27,11 +27,11 @@ public class MemberModel {
         this.desc = desc;
     }
 
-    public String getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 }
