@@ -35,8 +35,6 @@ import com.oman.sayakil.databinding.FragmentCycleBinding;
 import com.oman.sayakil.databinding.ItemCycleBinding;
 import com.oman.sayakil.model.CycleModel;
 import com.oman.sayakil.ui.activities.PaymentCardDetailsActivity;
-import com.razorpay.Checkout;
-import com.razorpay.PaymentResultListener;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -46,7 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CycleFragment extends Fragment implements PaymentResultListener {
+public class CycleFragment extends Fragment {
 
     private static final String TAG = "CycleFragment";
     private FragmentCycleBinding binding;
@@ -163,21 +161,8 @@ public class CycleFragment extends Fragment implements PaymentResultListener {
         binding = null;
     }
 
-    @Override
-    public void onPaymentSuccess(String s) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Payment ID");
-        builder.setMessage(s);
-        builder.show();
-        saveDataOnFirstore(s);
-    }
 
-    @Override
-    public void onPaymentError(int i, String s) {
-
-        saveDataOnFirstore(s);
-    }
 
     private class CycleAdapter extends RecyclerView.Adapter<CycleAdapter.ViewHolder> {
 

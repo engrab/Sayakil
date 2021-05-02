@@ -1,5 +1,6 @@
 package com.oman.sayakil.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -25,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.oman.sayakil.R;
 import com.oman.sayakil.utils.Tools;
-import com.razorpay.PaymentResultListener;
 
 import java.util.HashMap;
 
@@ -165,10 +165,9 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
                 String name = et_name.getText().toString().trim();
 
                 if (cardnumber.length()==16 && cvv.length()==3 && expire.length()==4 && !name.isEmpty()){
-                    Toast.makeText(PaymentCardDetailsActivity.this, "pay successfully", Toast.LENGTH_SHORT).show();
                     saveDataOnFirstore(cardnumber, cvv, expire, name, price);
                 }else {
-                    Toast.makeText(PaymentCardDetailsActivity.this, "fill all field", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PaymentCardDetailsActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -216,6 +215,8 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(PaymentCardDetailsActivity.this, "successfully", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(PaymentCardDetailsActivity.this, MainActivity.class));
+                    finish();
                 }
             }
         });
