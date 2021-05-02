@@ -28,6 +28,7 @@ import com.oman.sayakil.R;
 import com.oman.sayakil.utils.Tools;
 
 import java.util.HashMap;
+import java.util.Random;
 
 
 public class PaymentCardDetailsActivity extends AppCompatActivity {
@@ -214,13 +215,54 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
+                    Random r = new Random();
+                    saveSaveTranscation(r.nextInt(1000 - 100) + 100);
                     Toast.makeText(PaymentCardDetailsActivity.this, "successfully", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+    }
+
+    private void saveSaveTranscation(int transation) {
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String email = null;
+        String phoneNumber = null;
+        DocumentReference doc = null;
+
+        if (currentUser != null) {
+            email = currentUser.getEmail();
+            phoneNumber = currentUser.getPhoneNumber();
+        }
+        if (email != null && !email.isEmpty()) {
+
+
+            doc = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid()).collection("rent").document("cycle");
+        } else {
+            if (phoneNumber != null) {
+
+                doc = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid()).collection("rent").document("cycle");
+            } else {
+                Toast.makeText(this, "Please Authenticate your self", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+        HashMap<String, String> data = new HashMap<>();
+
+        data.put("t_id", String.valueOf(transation));
+
+
+        doc.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(PaymentCardDetailsActivity.this, "successfully transcation", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(PaymentCardDetailsActivity.this, MainActivity.class));
                     finish();
                 }
             }
         });
     }
-
-
 }

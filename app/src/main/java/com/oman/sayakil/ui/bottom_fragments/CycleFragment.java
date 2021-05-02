@@ -52,10 +52,9 @@ public class CycleFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CycleAdapter mAdapter;
     private DocumentReference document;
-    private static final String KEY_TRANSCATION_ID="t_id";
+    private static final String KEY_TRANSCATION_ID = "t_id";
 
     int amount = 100;
-
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -109,7 +108,7 @@ public class CycleFragment extends Fragment {
 
     private void startRecyclerView() {
         mAdapter = new CycleAdapter(getContext(), mList);
-        binding.rvCycle.setLayoutManager(new GridLayoutManager(getContext(),2));
+        binding.rvCycle.setLayoutManager(new GridLayoutManager(getContext(), 2));
         binding.rvCycle.setAdapter(mAdapter);
     }
 
@@ -137,22 +136,6 @@ public class CycleFragment extends Fragment {
         }
     }
 
-    private void saveDataOnFirstore(String transation) {
-
-        HashMap<String, String> data = new HashMap<>();
-
-        data.put(KEY_TRANSCATION_ID, transation);
-
-
-        document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(getContext(), "successfully inserted transcation id", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
 
 
     @Override
@@ -160,8 +143,6 @@ public class CycleFragment extends Fragment {
         super.onDestroy();
         binding = null;
     }
-
-
 
 
     private class CycleAdapter extends RecyclerView.Adapter<CycleAdapter.ViewHolder> {
@@ -195,7 +176,7 @@ public class CycleFragment extends Fragment {
                     String image = cycleList.get(position).getImage();
                     String desc = cycleList.get(position).getDesc();
                     showCustomDialog(title, desc, price, image);
-                    amount = Math.round(Float.parseFloat(String.valueOf(cycleList.get(position).getPrice()))*amount);
+                    amount = Math.round(Float.parseFloat(String.valueOf(cycleList.get(position).getPrice())) * amount);
 
                 }
             });
@@ -238,7 +219,6 @@ public class CycleFragment extends Fragment {
         tvPrice.setText(String.valueOf(price));
         tvTitle.setText(title);
         tvDesc.setText(desc);
-
 
 
         dialog.findViewById(R.id.btn_pay).setOnClickListener(new View.OnClickListener() {
