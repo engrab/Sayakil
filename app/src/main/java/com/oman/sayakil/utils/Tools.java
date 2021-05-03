@@ -66,6 +66,10 @@ public class Tools {
         SimpleDateFormat newFormat = new SimpleDateFormat("h:mm a");
         return newFormat.format(new Date(time));
     }
+    public static String getFormattedDateShort(Long dateTime) {
+        SimpleDateFormat newFormat = new SimpleDateFormat("MMM dd, yyyy");
+        return newFormat.format(new Date(dateTime));
+    }
 
     public static GoogleMap configActivityMaps(GoogleMap googleMap) {
         // set map type

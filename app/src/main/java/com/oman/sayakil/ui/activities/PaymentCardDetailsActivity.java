@@ -9,6 +9,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Source;
 import com.oman.sayakil.R;
+import com.oman.sayakil.dialoge.DialogPaymentSuccessFragment;
 import com.oman.sayakil.utils.Tools;
 
 import java.util.HashMap;
@@ -193,6 +196,7 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
 
                 if (cardnumber.length()==16 && cvv.length()==3 && expire.length()==4 && !name.isEmpty()){
                     saveDataOnFirstore(cardnumber, cvv, expire, name, price);
+
                 }else {
                     Toast.makeText(PaymentCardDetailsActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
 
@@ -200,6 +204,14 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showDialogPaymentSuccess() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        DialogPaymentSuccessFragment newFragment = new DialogPaymentSuccessFragment(price);
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
     }
 
     private void createAccountOnFireStore() {
@@ -243,7 +255,6 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Random r = new Random();
                     saveSaveTranscation(r.nextInt(1000 - 100) + 100);
-                    Toast.makeText(PaymentCardDetailsActivity.this, "successfully", Toast.LENGTH_SHORT).show();
 
                 }
             }
@@ -284,9 +295,8 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(PaymentCardDetailsActivity.this, "successfully transcation", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(PaymentCardDetailsActivity.this, MainActivity.class));
-                    finish();
+                    showDialogPaymentSuccess();
+
                 }
             }
         });
