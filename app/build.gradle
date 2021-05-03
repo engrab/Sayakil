@@ -59,6 +59,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
     implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-messaging'
     def multidex_version = "2.0.1"
     implementation "androidx.multidex:multidex:$multidex_version"
     implementation "androidx.cardview:cardview:1.0.0"

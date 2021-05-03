@@ -1,6 +1,7 @@
 package com.oman.sayakil.ui.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -25,11 +26,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.oman.sayakil.R;
 import com.oman.sayakil.databinding.ActivityNotificationBinding;
 import com.oman.sayakil.databinding.ItemNotificationBinding;
-import com.oman.sayakil.model.MessageModel;
+import com.oman.sayakil.model.NotificationModel;
 import com.oman.sayakil.utils.Tools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class NotificationActivity extends AppCompatActivity {
@@ -40,10 +43,13 @@ public class NotificationActivity extends AppCompatActivity {
 
 
     private ActivityNotificationBinding binding;
-    private List<MessageModel> mList;
+    private List<NotificationModel> mList;
     private NotificationAdapter mAdapter;
     private ActionBar actionBar;
     Toolbar toolbar;
+    private String title = "";
+    private String body = "";
+
     public void initToolbar() {
 
         toolbar = findViewById(R.id.toolbar);
@@ -57,11 +63,24 @@ public class NotificationActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+    }
+
+    @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityNotificationBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        Bundle bundle = getIntent().getExtras();
+
+        if (bundle != null) {
+           title = bundle.get("title").toString();
+           body = bundle.get("body").toString();
+            setNotificationOnFirebase(title, body);
+
+        }
         initToolbar();
         mList = new ArrayList<>();
         startRecyclerViewAdapter();
@@ -69,6 +88,20 @@ public class NotificationActivity extends AppCompatActivity {
         getListItems();
     }
 
+    private void setNotificationOnFirebase(String title, String body){
+
+        Log.d(TAG, "setNotificationOnFirebase: "+title+" "+body);
+        Map<String, Object> data = new HashMap<>();
+        data.put("title", title);
+        data.put("body", body);
+
+        db.collection("notification").document().set(data).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+            }
+        });
+    }
 
 
     private void getListItems() {
@@ -83,7 +116,7 @@ public class NotificationActivity extends AppCompatActivity {
                             // Convert the whole Query Snapshot to a list
                             // of objects directly! No need to fetch each
                             // document.
-                            List<MessageModel> types = queryDocumentSnapshots.toObjects(MessageModel.class);
+                            List<NotificationModel> types = queryDocumentSnapshots.toObjects(NotificationModel.class);
 
                             // Add all to your list
                             mList.addAll(types);
@@ -112,9 +145,9 @@ public class NotificationActivity extends AppCompatActivity {
     private static class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
         private final Context context;
-        private List<MessageModel> messageList;
+        private List<NotificationModel> messageList;
 
-        public NotificationAdapter(Context context, List<MessageModel> messageList) {
+        public NotificationAdapter(Context context, List<NotificationModel> messageList) {
             this.context = context;
             this.messageList = messageList;
         }
@@ -128,7 +161,8 @@ public class NotificationActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-            holder.bindingmessage.tvMsg.setText(messageList.get(position).getNotify());
+            holder.bindingmessage.tvTitle.setText(messageList.get(position).getTitle());
+            holder.bindingmessage.tvBody.setText(messageList.get(position).getBody());
         }
 
         @Override
@@ -138,6 +172,7 @@ public class NotificationActivity extends AppCompatActivity {
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
             public ItemNotificationBinding bindingmessage;
+
             public ViewHolder(@NonNull ItemNotificationBinding binding1) {
                 super(binding1.getRoot());
                 bindingmessage = binding1;

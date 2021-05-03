@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.oman.sayakil">
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -27,7 +28,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Cyacle">
-        <activity android:name=".ui.activities.BottomSheetMapActivity"></activity>
+        <service
+            android:name=".service.FCMMessageReceiverService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity android:name=".ui.activities.BottomSheetMapActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -46,7 +55,6 @@
         <activity
             android:name=".ui.activities.NotificationActivity"
             android:parentActivityName=".ui.activities.MainActivity" />
-
         <activity android:name=".ui.activities.ProfileActivity" />
         <activity
             android:name=".ui.activities.PaymentCardDetailsActivity"
@@ -84,10 +92,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <service
-            android:name=".MyBackgroundLocationService"
-            android:enabled="true"
-            android:exported="false" />
+
 
         <activity
             android:name=".ui.activities.SignInActivity"

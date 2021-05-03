@@ -1,4 +1,4 @@
-package com.oman.sayakil;
+package com.oman.sayakil.utils;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -19,9 +19,6 @@ import java.util.Locale;
 public class Utils {
     public static final int UPDATE_INTERVAL = 2 * 1000;
     public static final int FASTEST_INTERVAL = 1000;
-
-
-
 
 
     public static boolean isNetworkAvailable(Context context)
@@ -50,6 +47,9 @@ public class Utils {
         }
         return false;
     }
+
+
+
 
     public static String getCompleteAddressString(Context context, double LATITUDE, double LONGITUDE)
     {

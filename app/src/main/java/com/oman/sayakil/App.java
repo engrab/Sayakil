@@ -10,15 +10,16 @@ import androidx.multidex.MultiDexApplication;
 public class App extends MultiDexApplication {
 
 
-    public static final String CHANNEL_ID = "default-channel";
+    public static final String FCM_CHANNEL_ID = "default-channel";
     @Override
     public void onCreate() {
         super.onCreate();
         MultiDex.install(getApplicationContext());
+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel notificationChannel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "LocationChannel",
+                    FCM_CHANNEL_ID,
+                    "FCM_Channel",
                     NotificationManager.IMPORTANCE_HIGH
             );
 
