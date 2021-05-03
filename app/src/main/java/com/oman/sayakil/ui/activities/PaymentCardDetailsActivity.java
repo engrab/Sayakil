@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +26,10 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.Source;
 import com.oman.sayakil.R;
 import com.oman.sayakil.utils.Tools;
 
@@ -35,6 +38,7 @@ import java.util.Random;
 
 
 public class PaymentCardDetailsActivity extends AppCompatActivity {
+    private static final String TAG = "PaymentCardDetailsActiv";
     private TextView card_number;
     private TextView card_expire;
     private TextView card_cvv;
@@ -53,6 +57,11 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
     private ActionBar actionBar;
     Toolbar toolbar;
 
+    private static final String KEY_CARD_HOLDER_NAME = "card_holder_name";
+    private static final String KEY_CARD_NUMBER = "card_number";
+    private static final String KEY_EXPIRY_DATE = "exiry_date";
+    private static final String KEY_SECURITY_CODE = "security_code";
+
     public void initToolbar() {
 
         toolbar = findViewById(R.id.toolbar);
@@ -70,6 +79,7 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_card_details);
         createAccountOnFireStore();
+        getDataFromFireStore();
         initToolbar();
         price = getIntent().getIntExtra("price_key",10);
 
@@ -281,4 +291,59 @@ public class PaymentCardDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private void getDataFromFireStore() {
+        DocumentReference doc = null;
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String email = null;
+        String phoneNumber = null;
+
+
+        if (currentUser != null) {
+            email = currentUser.getEmail();
+            phoneNumber = currentUser.getPhoneNumber();
+        }
+        if (email != null && !email.isEmpty()) {
+
+            doc = FirebaseFirestore.getInstance().collection(email).document(currentUser.getUid());
+        } else {
+            if (phoneNumber != null) {
+
+                doc = FirebaseFirestore.getInstance().collection(phoneNumber).document(currentUser.getUid());
+            } else {
+                Toast.makeText(this, "Please Authenticate your self", Toast.LENGTH_SHORT).show();
+            }
+
+        }
+
+        doc.get(Source.DEFAULT).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                if (task.isSuccessful()) {
+                    DocumentSnapshot result = task.getResult();
+                    if (result.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + result.getData());
+                        insertDataInView(result);
+
+
+                    }
+                }
+            }
+        });
+    }
+
+    private void insertDataInView(DocumentSnapshot result) {
+        card_name.setText(String.valueOf(result.get(KEY_CARD_HOLDER_NAME)));
+        et_name.setText(String.valueOf(result.get(KEY_CARD_HOLDER_NAME)));
+        card_number.setText(String.valueOf(result.get(KEY_CARD_NUMBER)));
+        et_card_number.setText(String.valueOf(result.get(KEY_CARD_NUMBER)));
+        card_expire.setText(String.valueOf(result.get(KEY_EXPIRY_DATE)));
+        et_expire.setText(String.valueOf(result.get(KEY_EXPIRY_DATE)));
+        card_cvv.setText(String.valueOf(result.get(KEY_SECURITY_CODE)));
+        et_cvv.setText(String.valueOf(result.get(KEY_SECURITY_CODE)));
+
+    }
+
 }

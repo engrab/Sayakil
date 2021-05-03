@@ -35,7 +35,7 @@ import java.util.HashMap;
 
 
 public class PaymentInformationActivity extends AppCompatActivity {
-    private static final String TAG = "PaymentInformationFragm";
+    private static final String TAG = "PaymentInformationActivity";
     private TextView card_number;
     private TextView card_expire;
     private TextView card_cvv;
@@ -195,6 +195,29 @@ public class PaymentInformationActivity extends AppCompatActivity {
         });
     }
 
+
+
+    private void saveDataOnFirstore(String cardnumber, String cvv, String expire, String name) {
+
+        HashMap<String, String> data = new HashMap<>();
+
+        data.put(KEY_CARD_HOLDER_NAME, name);
+        data.put(KEY_CARD_NUMBER, cardnumber);
+        data.put(KEY_EXPIRY_DATE, expire);
+        data.put(KEY_SECURITY_CODE, cvv);
+
+
+        document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(PaymentInformationActivity.this, "successfully inserted data", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(PaymentInformationActivity.this, MainActivity.class));
+                    finish();
+                }
+            }
+        });
+    }
     private void createAccountOnFireStore() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String email = null;
@@ -218,29 +241,6 @@ public class PaymentInformationActivity extends AppCompatActivity {
 
         }
     }
-
-    private void saveDataOnFirstore(String cardnumber, String cvv, String expire, String name) {
-
-        HashMap<String, String> data = new HashMap<>();
-
-        data.put(KEY_CARD_HOLDER_NAME, name);
-        data.put(KEY_CARD_NUMBER, cardnumber);
-        data.put(KEY_EXPIRY_DATE, expire);
-        data.put(KEY_SECURITY_CODE, cvv);
-
-
-        document.set(data, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(PaymentInformationActivity.this, "successfully inserted data", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(PaymentInformationActivity.this, MainActivity.class));
-                    finish();
-                }
-            }
-        });
-    }
-
     private void getDataFromFireStore() {
         document.get(Source.DEFAULT).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override

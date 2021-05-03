@@ -20,7 +20,6 @@ import com.oman.sayakil.ui.drawer_fragments.MessageFragment;
 import com.oman.sayakil.ui.drawer_fragments.RentTimerFragment;
 import com.oman.sayakil.ui.drawer_fragments.SettingsFragmentPref;
 import com.oman.sayakil.ui.drawer_fragments.ContactUsFragment;
-import com.oman.sayakil.ui.fragments.MemberShipFragment;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -53,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.nav_host_fragment, new MapsFragment())
                     .commit();
+            binding.mainContent.bottomNavView.setVisibility(View.VISIBLE);
             binding.mainContent.bottomNavView.setSelectedItemId(R.id.bottom_nav_view);
         }
 
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new MessageFragment())
                         .commit();
+                binding.mainContent.bottomNavView.setVisibility(View.GONE);
 
                 break;
 
@@ -98,9 +99,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.nav_member_ship:
 
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new MemberShipFragment())
-                        .commit();
+                startActivity(new Intent(MainActivity.this, MemberShipActivity.class));
+
                 break;
 
             case R.id.nav_rent:
@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new CycleFragment())
                         .commit();
+                binding.mainContent.bottomNavView.setVisibility(View.VISIBLE);
                 binding.mainContent.bottomNavView.setSelectedItemId(R.id.bottom_nav_view);
 
                 MenuItem item1 = binding.mainContent.bottomNavView.getMenu().findItem(R.id.nav_bottom_cycle);
@@ -122,20 +123,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new ContactUsFragment())
                         .commit();
-
+                binding.mainContent.bottomNavView.setVisibility(View.GONE);
                 break;
             case R.id.nav_rentle_timer:
 
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new RentTimerFragment())
                         .commit();
+                binding.mainContent.bottomNavView.setVisibility(View.GONE);
                 break;
             case R.id.nav_setting:
 
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.nav_host_fragment, new SettingsFragmentPref())
                         .commit();
-
+                binding.mainContent.bottomNavView.setVisibility(View.GONE);
                 break;
             case R.id.nav_logout:
 

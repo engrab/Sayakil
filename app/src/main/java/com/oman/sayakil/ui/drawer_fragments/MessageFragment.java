@@ -25,11 +25,7 @@ import com.oman.sayakil.model.MessageModel;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MessageFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class MessageFragment extends Fragment {
 
     private static final String TAG = "MessageFragment";
