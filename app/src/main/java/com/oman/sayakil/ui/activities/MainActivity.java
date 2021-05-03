@@ -16,7 +16,6 @@ import com.oman.sayakil.databinding.ActivityMainBinding;
 import com.oman.sayakil.ui.bottom_fragments.CycleFragment;
 import com.oman.sayakil.ui.bottom_fragments.MapsFragment;
 import com.oman.sayakil.ui.bottom_fragments.KeyFragment;
-import com.oman.sayakil.ui.drawer_fragments.MessageFragment;
 import com.oman.sayakil.ui.drawer_fragments.RentTimerFragment;
 import com.oman.sayakil.ui.drawer_fragments.SettingsFragmentPref;
 import com.oman.sayakil.ui.drawer_fragments.ContactUsFragment;
@@ -82,12 +81,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 break;
 
-            case R.id.nav_email:
+            case R.id.nav_notification:
 
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.nav_host_fragment, new MessageFragment())
-                        .commit();
-                binding.mainContent.bottomNavView.setVisibility(View.GONE);
+                startActivity(new Intent(MainActivity.this, NotificationActivity.class));
 
                 break;
 

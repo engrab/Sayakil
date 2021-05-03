@@ -25,6 +25,8 @@ public class SharedPreferencesManager {
     private static final String SECURITY_CODE_KEY = "scode";
     private static final String CARD_HOLDER_NAME_KEY = "cardHolder";
 
+    private static final String WELCOME_KEY = "first_time";
+
 
     private SharedPreferences sharedPrefs;
     private static SharedPreferencesManager instance;
@@ -202,5 +204,15 @@ public class SharedPreferencesManager {
 
     public String getCardHolderName() {
         return sharedPrefs.getString(CARD_HOLDER_NAME_KEY, "ABC");
+    }
+
+    public void setWelcome(boolean isFirstTime) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(WELCOME_KEY, isFirstTime);
+        editor.apply();
+    }
+
+    public boolean getWelcome() {
+        return sharedPrefs.getBoolean(WELCOME_KEY, false);
     }
 }

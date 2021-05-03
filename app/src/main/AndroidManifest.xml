@@ -43,6 +43,10 @@
         <activity
             android:name=".ui.activities.FeedBackActivity"
             android:parentActivityName=".ui.activities.MainActivity" />
+        <activity
+            android:name=".ui.activities.NotificationActivity"
+            android:parentActivityName=".ui.activities.MainActivity" />
+
         <activity android:name=".ui.activities.ProfileActivity" />
         <activity
             android:name=".ui.activities.PaymentCardDetailsActivity"

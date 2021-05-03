@@ -46,9 +46,9 @@
         tools:layout="@layout/fragment_rent_timer" />
     <fragment
         android:id="@+id/messageFragment"
-        android:name="com.oman.sayakil.ui.drawer_fragments.MessageFragment"
+        android:name="com.oman.sayakil.ui.activities.NotificationActivity"
         android:label="fragment_message"
-        tools:layout="@layout/fragment_message" />
+        tools:layout="@layout/activity_notification" />
     <fragment
         android:id="@+id/tripsFragment"
         android:name="com.oman.sayakil.ui.drawer_fragments.TripsFragment"

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,6 +40,7 @@ import com.oman.sayakil.R;
 import com.oman.sayakil.adapter.AdapterChatBBM;
 import com.oman.sayakil.model.CycleModel;
 import com.oman.sayakil.model.Message;
+import com.oman.sayakil.pref.SharedPreferencesManager;
 import com.oman.sayakil.utils.Tools;
 
 import java.util.ArrayList;
@@ -84,6 +86,16 @@ public class FeedBackActivity extends AppCompatActivity {
         Tools.setSystemBarColorInt(this, Color.parseColor("#0A7099"));
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!SharedPreferencesManager.getInstance(this).getWelcome()) {
+
+            insertItems("Welcome Dear!", false, Tools.getFormattedTimeEvent(System.currentTimeMillis()));
+            SharedPreferencesManager.getInstance(this).setWelcome(true);
+        }
     }
 
     public void iniComponent() {
